@@ -1,0 +1,1 @@
+all:!make skynet/Makefile
