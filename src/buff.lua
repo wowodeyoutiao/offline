@@ -1,5 +1,5 @@
 local buff_conf = require "buff_conf"
-local buff {
+local buff = {
 	--[[
 	hp = 0,--体力值
     mp = 0,--魔法值
@@ -69,15 +69,6 @@ local buff:del_buff()
     actor.attactspeed = actor.attactspeed - self.buff.attactspeed--攻击速度
     actor.magicalresistance = actor.magicalresistance - self.buff.magicalresistance--魔法抗性
     actor.armor = actor.armor - self.buff.armor--护甲  
-end
-
-local buff.checkbufflist(time)
-	for i, v in ipairs(bufflist) do
-		if v:check_bufftime(time) then
-			v:del_buff()
-			v = nil
-		end
-	end	
 end
 
 return buff

@@ -1,0 +1,3 @@
+local equipment_conf = {
+	
+}

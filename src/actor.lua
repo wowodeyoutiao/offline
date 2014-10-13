@@ -35,7 +35,46 @@ local function actor:beingphysicalattack(damage)
     self.hp = self.hp - damage
 end
 
+local function actor:getspelldamage()
+    return self.spelldamage
+end
+
+local function actor:beingspelldamage(damage)
+    damage = damage - self.magicalresistance
+    self.hp = self.hp - damage
+end
+
 local function actor:add_buff(buff)
+    buff:start()
+    buff:add_actor(self)
+    table.insert(self.buff, buff)
 
 end
+
+local function actor:check_buff(time)
+    for i, v in ipairs(self.buff) do
+        if v:check_bufftime(time) then
+            v:del_buff()
+            v = nil
+        end
+    end 
+end 
+
+local function actor:add_equipment(equipment)
+    equipment:add_actor(self)
+    table.insert(self.equipment, equipment)
+end
+
+local function actor:del_equipment(equipment)
+    table
+end
+
+local function actor:add_skill(skill)
+end
+
+local function actor:del_skill(skill)
+end
+
+
+
 
