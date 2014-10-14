@@ -1,16 +1,23 @@
 local equipment_conf = require "equipment_conf"
-local equipment_mgr = {
+local game_utils = require "game_utils"
+local equipment = {
+totalid = 1
 }
 --get a new equipment
-local function equipment_mgr.new(id)
+local function equipment.new(id)
 	local t =  {}
-	local equipment_model = equipment_conf[id]
-	t.position = equipment_model.position
-	if equipment_model.hp then t.hp = equipment_model.hp end
+	t.id = equipment.totalid
+	equipment.totalid = equipment.totalid + 1
+	setmetatable(t, equipment)
+	t.equipment = equipment_conf[id]
 	return t
 end
 
-local function equipment_mgr:add_actor(actor)
-	-- body
+local function equipment:add_attri(actor)
+	game_utils.add_attri(actor, self.equipment)
+end
+
+local function equipment:del_attri(actor)
+	game_utils.del_attri(actor, self.equipment)
 end
 

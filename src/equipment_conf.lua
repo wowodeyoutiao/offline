@@ -1,5 +1,4 @@
 local equipment_conf = {
-	
 	NECKLACE = 1,
 	LEFTRING = 2，
 	RIGHTRING= 3，
@@ -12,6 +11,7 @@ local equipment_conf = {
 	position = NECKLACE，
 	name = '布衣(男)',
 	job = 0,
+	needlevel = 1,
 	hp = 100
 	}
 }

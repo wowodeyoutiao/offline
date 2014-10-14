@@ -18,7 +18,7 @@ local actor {
     buff = {},
     skills = {},--技能
     bag = {},--包裹
-    equipment = {},--装备
+    equipments = {},--装备
 }
 
 local function actor:getphysicaldamage()
@@ -48,7 +48,6 @@ local function actor:add_buff(buff)
     buff:start()
     buff:add_actor(self)
     table.insert(self.buff, buff)
-
 end
 
 local function actor:check_buff(time)
@@ -61,19 +60,36 @@ local function actor:check_buff(time)
 end 
 
 local function actor:add_equipment(equipment)
-    equipment:add_actor(self)
-    table.insert(self.equipment, equipment)
+    equipment:add_attri(self)
+    self.equipments[equipment.position] = equipment
 end
 
 local function actor:del_equipment(equipment)
-    table
+    equipment.del_attri(self)
+    self.equipments[equipment.position] = nil
+end
+
+local function actor:add_to_bag(item)
+    table.insert(self.bag, item)
+end
+
+local function actor:del_to_bag(item)
+    for i,v in ipairs(self.bag) do
+        if v = item then table.remove(self.bag, i) end
+    end
 end
 
 local function actor:add_skill(skill)
+    table.insert(self.skill, skill)
 end
 
 local function actor:del_skill(skill)
+    for i,v in ipairs(self.skill) do
+        if v = skill then table.remove(self.skill, i) end
+    end
 end
+
+return actor
 
 
 

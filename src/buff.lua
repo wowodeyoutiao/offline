@@ -1,4 +1,5 @@
 local buff_conf = require "buff_conf"
+local game_utils = require "game_utils"
 local buff = {
 	--[[
 	hp = 0,--体力值
@@ -43,32 +44,11 @@ end
 
 local buff:add_buff(actor)
 	self.actor = actor
-	actor.hp = actor.hp + self.buff.hp--体力值
-    actor.mp = actor.mp + self.buff.mp--魔法值
-   	actor.hprate = actor.hprate + self.buff.hprate --每秒回血
-    actor.mprate = actor.mprate + self.buff.mprate --每秒回蓝
-    actor.criticaldamage = actor.criticaldamage + self.buff.criticaldamage--暴击最高伤害
-    actor.criticalrate = actor.criticalrate + self.buff.criticalrate--暴击概率
-    actor.physicaldamage = actor.physicaldamage + self.buff.physicaldamage--物理伤害
-    actor.spelldamage = actor.spelldamage + self.buff.spelldamage--魔法伤害
-    actor.attactspeed = actor.attactspeed + self.buff.attactspeed--攻击速度
-    actor.magicalresistance = actor.magicalresistance + self.buff.magicalresistance--魔法抗性
-    actor.armor = actor.armor + self.buff.armor--护甲  
+    game_utils.add_attri(actor, self.buff) 	 
 end
 
 local buff:del_buff()
-	local actor = self.actor
-	actor.hp = actor.hp - self.buff.hp--体力值
-    actor.mp = actor.mp - self.buff.mp--魔法值
-   	actor.hprate = actor.hprate - self.buff.hprate --每秒回血
-    actor.mprate = actor.mprate - self.buff.mprate --每秒回蓝
-    actor.criticaldamage = actor.criticaldamage - self.buff.criticaldamage--暴击最高伤害
-    actor.criticalrate = actor.criticalrate - self.buff.criticalrate--暴击概率
-    actor.physicaldamage = actor.physicaldamage - self.buff.physicaldamage--物理伤害
-    actor.spelldamage = actor.spelldamage - self.buff.spelldamage--魔法伤害
-    actor.attactspeed = actor.attactspeed - self.buff.attactspeed--攻击速度
-    actor.magicalresistance = actor.magicalresistance - self.buff.magicalresistance--魔法抗性
-    actor.armor = actor.armor - self.buff.armor--护甲  
+    game_utils.del_attri(self.actor, self.buff) 
 end
 
 return buff
