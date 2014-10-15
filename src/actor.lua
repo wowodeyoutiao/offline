@@ -69,16 +69,6 @@ local function actor:del_equipment(equipment)
     self.equipments[equipment.position] = nil
 end
 
-local function actor:add_to_bag(item)
-    table.insert(self.bag, item)
-end
-
-local function actor:del_to_bag(item)
-    for i,v in ipairs(self.bag) do
-        if v = item then table.remove(self.bag, i) end
-    end
-end
-
 local function actor:add_skill(skill)
     table.insert(self.skill, skill)
 end
