@@ -2,7 +2,7 @@ local game_utils = {
 	
 }
 
-local function game_utils.add_attri(actor, attri)
+function game_utils.add_attri(actor, attri)
 	if attri.hp then actor.hp = actor.hp + attri.hp end--体力值
     if attri.mp then actor.mp = actor.mp + attri.mp end--魔法值
    	if attri.hprate then actor.hprate = actor.hprate + attri.hprate end --每秒回血
@@ -16,7 +16,7 @@ local function game_utils.add_attri(actor, attri)
     if attri.armor then actor.armor = actor.armor + attri.armor end--护甲  
 end
 
-local function game_utils.del_attri(actor, attri)
+function game_utils.del_attri(actor, attri)
 	if attri.hp then actor.hp = actor.hp - attri.hp end--体力值
     if attri.mp then actor.mp = actor.mp - attri.mp end--魔法值
    	if attri.hprate then actor.hprate = actor.hprate - attri.hprate end --每秒回血
@@ -30,7 +30,8 @@ local function game_utils.del_attri(actor, attri)
     if attri.armor then actor.armor = actor.armor - attri.armor end--护甲  
 end
 
-local function game_utils.copy_attri(di, si)
+function game_utils.copy_attri(di, si)
+	if si.level then di.level = si.level end--级别
     if si.hp then di.hp = si.hp end--体力值
     if si.mp then di.mp = si.mp end--魔法值
     if si.hprate then di.hprate = si.hprate end --每秒回血

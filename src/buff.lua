@@ -19,7 +19,7 @@ local buff = {
 
 local bufflist =  {}
 
-local buff.new(buff1)
+function buff.new(buff1)
 	if not buff1 then return nil end
 	local t = {
 	buff = buff1,--buff 
@@ -30,11 +30,11 @@ local buff.new(buff1)
 	return t
 end
 
-local buff:start(time)
+function buff:start(time)
 	self.starttime = time
 end
 
-local buff:check_bufftime(time)
+function buff:check_bufftime(time)
 	if self.starttime + self.buff.time >= time then
 		return true
 	else
@@ -42,12 +42,12 @@ local buff:check_bufftime(time)
 	end
 end
 
-local buff:add_buff(actor)
+function buff:add_buff(actor)
 	self.actor = actor
     game_utils.add_attri(actor, self.buff) 	 
 end
 
-local buff:del_buff()
+function buff:del_buff()
     game_utils.del_attri(self.actor, self.buff) 
 end
 
