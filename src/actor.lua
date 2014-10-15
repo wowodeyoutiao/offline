@@ -27,7 +27,8 @@ actor.__index = actor
 
 function actor.new()
     local t = {}
-    t.level = 0;
+    t.name = 'anmeng'
+    t.level = 0
     t.currentexperience = 0
     t.maxexperience = 0
     t.hp = 0--体力值

@@ -1,4 +1,9 @@
 local monster_conf = {
+	default_monster1 = {
+		hp = 100,
+		mp = 100,
+		physicaldamage = 100
+	},
 	monster1 = {
 	level = 10,
 	hp = 998,
