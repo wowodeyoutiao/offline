@@ -7,7 +7,7 @@ local player = {
 setmetatable(player, actor)
 
 function player.new()
-	local t = {}
+	local t = actor.new()
 	setmetatable(t, player)
 	return t
 end
@@ -18,6 +18,6 @@ end
 
 function player:del_to_bag(item)
     for i,v in ipairs(self.bag) do
-        if v = item then table.remove(self.bag, i) end
+        if v == item then table.remove(self.bag, i) end
     end
 end

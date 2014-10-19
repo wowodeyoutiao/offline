@@ -1,9 +1,12 @@
---local skynet = require "skynet"
+local skynet = require "skynet"
 
 --local fight_round = require "fight_round"
 local fightscene_conf = require "fightscene_conf"
 local monster = require "monster"
 local player = require "player"
+local player_conf = require "player_conf"
+local game_utils = require "game_utils"
+local redis = require "redis"
 
 local  CMD = {}
 
@@ -11,8 +14,13 @@ local fightscene = {}
 local ordinary_monster = {}
 local boss_monster = {}
 
-function fightscene.fight()
-	skynet.sleep(100)
+function fightscene.fight(co)
+	local i = 0
+	while true do
+		i = i + 1
+		skynet.sleep(100)
+		print("fuck", i)
+	end
 end
 
 function gen_monster(monster_conf, list)
@@ -56,10 +64,21 @@ function CMD.changescene(agent, id)
 end
 
 function CMD.load_player()
-	-- body
+	
 end
-fightscene.init()
---[[
+
+function CMD.new_player(agent, job)
+	if job and (job > 0) and (job < player_conf.job_count) then
+		local newplayer = player.new()
+		game_utils.copy_attri(newplayer, player_conf[job])
+		redis:multi()
+		for k,v in pairs(newplayer) do
+			redis:hset(k, v)
+		end
+		redis:exec()
+	end
+end
+
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
 		local f = CMD[string.lower(cmd)]
@@ -70,10 +89,9 @@ skynet.start(function()
 		end
 	end)
 	fightscene.init()
-	skynet.fork(fightscene.fight)
+	skynet.fork(fightscene.fight, coroutine.running())
 	skynet.register "fightscene"
 end)
-]]
 
 
 
