@@ -6,7 +6,8 @@ skynet.start(function()
 	print("Server start")
 	local console = skynet.newservice("console")
 	skynet.newservice("debug_console",8000)
-	skynet.newservice("simpledb")
+	
+	pcall(skynet.newservice, "testlogin")
 	local watchdog = skynet.newservice("watchdog")
 	skynet.call(watchdog, "lua", "start", {
 		port = 8888,
@@ -14,6 +15,5 @@ skynet.start(function()
 		nodelay = true,
 	})
 	print("Watchdog listen on ", 8888)
-
 	skynet.exit()
 end)

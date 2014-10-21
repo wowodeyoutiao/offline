@@ -19,19 +19,27 @@ function emailDecode(str)
     return string.gsub(str,"%%(%w%w)",_decode)
 end
 function login_server.auth(username, password)
-	local name = db:get()
+	local name = "account."..username
+	local id = db:get(name)
+	if id then
+		local pw = db:get(name..id..".password")
+		if password == pw then return id end
+	end
+	return false
 end
 
 function login_server.new_account(name, password)
-	local accout = "account."..name  
+	local account = "account."..name
 	local ok = db:exists(account)
 	if not ok then
-	
-		local id = 
-		db:set(account, db:incr("account.count"))
-		db:set()
+		local id = db:incr("account.count")
+		db:set(account, id)
+		db:set(account..id..".password", password)
+		print "OK"
 		return true
+		
 	else
+		print "NO"
 		return false
 	end
 end
@@ -43,6 +51,9 @@ function login_server.get_actors(name)
 
 end
 
+function login_server.create_actor(id, name)
+end
+
 function login_server.start()
 	local conf = {
 		host = "127.0.0.1" ,
@@ -52,14 +63,14 @@ function login_server.start()
 	db = redis.connect(conf)
 	local ok  = db:exists "account.count"
 	if not result then db:set("account.count", "0")  end
+	print("start login server")
+	return true
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
 			local f = assert(login_server[cmd])
-			skynet.ret(skynet.pack(f(subcmd, ...)))
-
+			skynet.ret(skynet.pack(f(...)))
 	end)
-	print("runing login server")
-	login_server.start()
+	skynet.register "login_server"
 end)
