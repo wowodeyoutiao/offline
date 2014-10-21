@@ -19,16 +19,12 @@ function emailDecode(str)
     return string.gsub(str,"%%(%w%w)",_decode)
 end
 function login_server.auth(username, password)
-	local name = db:get()
 end
 
 function login_server.new_account(name, password)
-	local ok = db:exists "account.count"
+	local ok, result = db:exists "account.count"
 	if not ok then
 		db:set("account."..name, password)
-		return true
-	else
-		return false
 	end
 end
 
@@ -46,16 +42,16 @@ function login_server.start()
 		db = 0
 	}
 	db = redis.connect(conf)
-	local ok  = db:exists "account.count"
-	if not result then db:set("account.count", "0")  end
+	local ok, result = db:exists "account.count"
+	print(ok, result)
+	if not result then db:set("account.count", "0") end
 end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
 			local f = assert(login_server[cmd])
 			skynet.ret(skynet.pack(f(subcmd, ...)))
-
+print("runing login server")
+			loin_server.start()
 	end)
-	print("runing login server")
-	login_server.start()
 end)
