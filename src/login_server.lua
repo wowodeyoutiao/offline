@@ -23,9 +23,13 @@ function login_server.auth(username, password)
 end
 
 function login_server.new_account(name, password)
-	local ok = db:exists "account.count"
+	local accout = "account."..name  
+	local ok = db:exists(account)
 	if not ok then
-		db:set("account."..name, password)
+	
+		local id = 
+		db:set(account, db:incr("account.count"))
+		db:set()
 		return true
 	else
 		return false
