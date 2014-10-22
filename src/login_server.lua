@@ -35,11 +35,10 @@ function login_server.new_account(name, password)
 		local id = db:incr("account.count")
 		db:set(account, id)
 		db:set(account..id..".password", password)
-		print "OK"
+		db:rpush("account.userlist", id)
 		return true
 		
 	else
-		print "NO"
 		return false
 	end
 end
@@ -52,6 +51,15 @@ function login_server.get_actors(name)
 end
 
 function login_server.create_actor(id, name)
+	local actor = "actor."..name
+	local ok = db:exists(actor)
+	if not ok then		
+		local actorid = db:incr("actor.count")
+		db:set(actor, actorid)
+		db:sadd("account."..id..".actors", actorid)
+		return true
+	end
+	return false
 end
 
 function login_server.start()
@@ -62,7 +70,9 @@ function login_server.start()
 	}
 	db = redis.connect(conf)
 	local ok  = db:exists "account.count"
-	if not result then db:set("account.count", "0")  end
+	if not ok then db:set("account.count", "0")  end
+	ok = db:exists("actor.count")
+	if not ok then db:set("actor.count", "0") end
 	print("start login server")
 	return true
 end
