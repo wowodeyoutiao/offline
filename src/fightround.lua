@@ -7,7 +7,7 @@ function fightround.fight(player ,monsters)
 	player:clone(tempplayer)
 	while true do
 		for i,v in ipairs(monsters) do
-			tempplayer:fight(v)
+			tempplayer:fight()
 		end
 		local alive = false
 		for i,v in ipairs(monsters) do

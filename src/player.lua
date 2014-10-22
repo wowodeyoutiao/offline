@@ -23,6 +23,7 @@ function player:del_to_bag(item)
     end
 end
 
-function player:fight(actor)
-	
+function player:fight()
+	t = {}
+	return t
 end

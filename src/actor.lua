@@ -70,10 +70,12 @@ function actor:getphysicaldamage()
     damage = self.attri.physicaldamage
     local rate = math.random()
     if rate < self.attri.criticalrate then
-        damage =damage + damage * self.attri.criticaldamage * rate 
+        damage = damage + damage * self.attri.criticaldamage * rate 
+        return true, damage
     end
-    return damage
-end 
+    return false, damage
+end
+
 function actor:beingphysicalattack(damage)
     damage = damge - self.attri.armor
     self.attri.hp = self.attri.hp - damage
