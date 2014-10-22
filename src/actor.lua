@@ -46,31 +46,46 @@ function actor.new()
     t.skills = {}--技能
     t.bag = {}--包裹
     t.equipments = {}--装备
-    setmetatable(t, actor)
+    t.death = false
+    setmetatable({attri = t}, actor)
     return t
+end
+
+function actor:clone(cloner)
+    if cloner then
+        game_utils.copy_attri(cloner.attri, self.attri, true)
+    else
+        local t = {}
+        game_utils.copy_attri(t.attri, self.attri, true)
+        return t
+    end
+end
+
+function actor:isalive()
+    return self.attri.hp > 0
 end
 
 function actor:getphysicaldamage()
     local damage = 0
-    damage = self.physicaldamage
+    damage = self.attri.physicaldamage
     local rate = math.random()
-    if rate < self.criticalrate then
-        damage =damage + damage * self.criticaldamage * rate 
+    if rate < self.attri.criticalrate then
+        damage =damage + damage * self.attri.criticaldamage * rate 
     end
     return damage
 end 
 function actor:beingphysicalattack(damage)
-    damage = damge - self.armor
-    self.hp = self.hp - damage
+    damage = damge - self.attri.armor
+    self.attri.hp = self.attri.hp - damage
 end
 
 function actor:getspelldamage()
-    return self.spelldamage
+    return self.attri.spelldamage
 end
 
 function actor:beingspelldamage(damage)
-    damage = damage - self.magicalresistance
-    self.hp = self.hp - damage
+    damage = damage - self.attri.magicalresistance
+    self.attri.hp = self.attri.hp - damage
 end
 
 function actor:add_buff(buff)

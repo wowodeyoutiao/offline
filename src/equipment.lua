@@ -14,10 +14,10 @@ local function equipment.new(id)
 end
 
 local function equipment:add_attri(actor)
-	game_utils.add_attri(actor, self.equipment)
+	game_utils.add_attri(actor.attri, self.equipment)
 end
 
 local function equipment:del_attri(actor)
-	game_utils.del_attri(actor, self.equipment)
+	game_utils.del_attri(actor.attri, self.equipment)
 end
 

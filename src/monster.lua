@@ -12,20 +12,14 @@ function monster.new(id)
 	setmetatable(t, monster)
 	if id then 
 		if not monster_conf[id] then return nil end
-		game_utils.copy_attri(t, monster_conf[id]) 
+		game_utils.copy_attri(t.attri, monster_conf[id]) 
 	end
-	return t
-end
-
-function monster:clone()
-	local t = {}
-	game_utils.copy_attri(t, self)
 	return t
 end
 
 function monster:set_default_attri(id)
 	if not self.level then return end
-	game_utils.copy_attri(self, monster_conf[id])
+	game_utils.copy_attri(self.attri, monster_conf[id])
 	self.hp = self.hp * self.level
 end
 

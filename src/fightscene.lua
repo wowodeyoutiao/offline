@@ -1,27 +1,19 @@
 local skynet = require "skynet"
+local redis = require "redis"
 
---local fight_round = require "fight_round"
+local fightround = require "fightround"
 local fightscene_conf = require "fightscene_conf"
 local monster = require "monster"
 local player = require "player"
 local player_conf = require "player_conf"
 local game_utils = require "game_utils"
-local redis = require "redis"
+
 
 local  CMD = {}
 
 local fightscene = {}
 local ordinary_monster = {}
 local boss_monster = {}
-
-function fightscene.fight(co)
-	local i = 0
-	while true do
-		i = i + 1
-		skynet.sleep(100)
-		print("fuck", i)
-	end
-end
 
 function gen_monster(monster_conf, list)
 	for k,v in pairs(monster_conf) do
@@ -39,7 +31,10 @@ end
 
 function fightscene.init()
 	for k,v in pairs(fightscene_conf) do
-		fightscene[k] = {}
+		fightscene[k] = {
+		round_monster_count = v[round_monster_count],
+		fight_rate = v[fight_rate]
+		}
 		ordinary_monster[k] = {}
 		gen_monster(v.scene, ordinary_monster[k])
 		boss_monster[k] = {}
@@ -47,35 +42,69 @@ function fightscene.init()
 	end
 end
 
-function CMD.startscene(agent, id)
+function fightscene.find_monster(player)
+	local curr_scene = fightscene[player.id]
+	local ret = {}
+	for i=1,curr_scene.round_monster_count do
+		local curr_monsterlist = ordinary_monster[k]
+		local max = #curr_monsterlist
+		local mon = curr_monsterlist[math.random(1, curr_monsterlist)].clone()
+		table.insert(ret, mon)
+	end
+	return ret
+end
+
+function fightscene.fight()
+	while true do
+		skynet.sleep(100)
+		local now = skynet.now()
+		for _,scene in pairs(fightscene) do -- in every scene
+			local fight_rate = scene.fight_rate
+			for _,player in ipairs(scene) do-- find every player
+				if now - player.lastfight >= fight_rate then
+					local mons = fightscene.find_monster(player)
+					if #mons > 0 then
+						fightround.fight(player, mons)
+						player.lastfight = now
+					end
+				end
+			end
+		end
+	end
+end
+
+function fightscene.save_player(player)
+		redis:multi()
+		for k,v in pairs(player.attri) do
+			redis:hset("actor."..playerid..".attri",k, v)
+		end
+		redis:exec()
+end
+
+function fightscene.startscene(player, id)
 	if not fightscene[id] then return false end
-	fightscene[id][agent.fd] = agent
-	agent.sceneid = id
+	fightscene[id][player.id] = player
+	player.sceneid = id
+	player.lastfight = 0
 	return true
 end
 
-function CMD.changescene(agent, id)
-	if fightscene[agent.sceneid][agent.fd] == agent then
-		fightscene[agent.sceneid][agent.fd] = nil
-		fightscene[id][agent.fd] = agent
+function CMD.changescene(player, id)
+	local curr_scene = fightscene[player.sceneid]
+	if curr_scene[player.id] == player then
+		curr_scene[player.id] = nil
+		curr_scene = player
 		return true
 	end
 	return false
 end
 
-function CMD.load_player()
-	
-end
-
-function CMD.new_player(agent, job)
+function CMD.new_player(playerid, job)
 	if job and (job > 0) and (job < player_conf.job_count) then
-		local newplayer = player.new()
-		game_utils.copy_attri(newplayer, player_conf[job])
-		redis:multi()
-		for k,v in pairs(newplayer) do
-			redis:hset(k, v)
-		end
-		redis:exec()
+		local newplayer = player.new(player_conf[job])
+		newplayer.id = playerid
+		fightround.save_player(newplayer)
+		fightscene.startscene(newplayer, 1)
 	end
 end
 
@@ -89,7 +118,7 @@ skynet.start(function()
 		end
 	end)
 	fightscene.init()
-	skynet.fork(fightscene.fight, coroutine.running())
+	skynet.fork(fightscene.fight)
 	skynet.register "fightscene"
 end)
 

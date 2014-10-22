@@ -44,11 +44,11 @@ end
 
 function buff:add_buff(actor)
 	self.actor = actor
-    game_utils.add_attri(actor, self.buff) 	 
+    game_utils.add_attri(actor.attri, self.buff) 	 
 end
 
 function buff:del_buff()
-    game_utils.del_attri(self.actor, self.buff) 
+    game_utils.del_attri(self.actor.attri, self.buff) 
 end
 
 return buff

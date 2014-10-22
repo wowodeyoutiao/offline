@@ -56,10 +56,11 @@ function login_server.create_actor(id, name)
 	if not ok then		
 		local actorid = db:incr("actor.count")
 		db:set(actor, actorid)
+		--db:set("actor."..actorid, id)
 		db:sadd("account."..id..".actors", actorid)
-		return true
+		return actorid
 	end
-	return false
+	return -1
 end
 
 function login_server.start()
