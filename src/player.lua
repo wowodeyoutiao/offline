@@ -1,8 +1,8 @@
 local actor = require "actor"
 local game_utils = require "game_utils"
-local player = {
-	
-}
+local damageflow = require "damageflow"
+
+local player = {}
 
 setmetatable(player, actor)
 
@@ -23,7 +23,12 @@ function player:del_to_bag(item)
     end
 end
 
-function player:fight()
-	t = {}
-	return t
+function player:fight(target, df)
+	local critical ,damage = self.getphysicaldamage()
+	damage = target:beingphysicalattack(damage)
+	if critical then
+		damageflow.add(damageflow.criticaldamage, self.id, target.id, damage)
+	else
+		damageflow.add(damageflow.damage, self.id, target.id, damage)
+	end
 end

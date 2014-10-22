@@ -79,6 +79,7 @@ end
 function actor:beingphysicalattack(damage)
     damage = damge - self.attri.armor
     self.attri.hp = self.attri.hp - damage
+    return damage
 end
 
 function actor:getspelldamage()
@@ -88,6 +89,7 @@ end
 function actor:beingspelldamage(damage)
     damage = damage - self.attri.magicalresistance
     self.attri.hp = self.attri.hp - damage
+    return damage
 end
 
 function actor:add_buff(buff)

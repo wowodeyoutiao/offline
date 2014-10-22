@@ -8,7 +8,6 @@ local player = require "player"
 local player_conf = require "player_conf"
 local game_utils = require "game_utils"
 
-
 local  CMD = {}
 
 local fightscene = {}
