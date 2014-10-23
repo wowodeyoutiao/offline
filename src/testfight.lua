@@ -26,5 +26,4 @@ for i,v in ipairs(df) do
 	print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用".. damageflow.get_damage_string(v.type).."造成"..v.damage.."伤害")
 end
 
-
 local drop = mon:get_drop()
