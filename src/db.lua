@@ -1,27 +1,21 @@
---local db = {}
+local db_conf = require "db_conf"
 local redis = require "redis"
---[[
-local redispoll = {}
-local current
-function dbpoll.command(cmd)
-	local r = redispoll[current]
-	return redis[cmd]
+local skynet = require "skynet"
+
+local dbs = {}
+local dbcount = 0
+local  function command(id, cmd, ...)
+	local rediscmd = assert(dbs[id % dbcount + 1])
+	return rediscmd(...)
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, source, cmd, ...)
-			local f = assert(dbpoll.command[cmd])
-			skynet.ret(skynet.pack(f(...)))
+	for i,v in ipairs(db_conf) do
+		dbcount = dbcount + 1
+		dbs[i] = redis.connect(v)
+	end
+	skynet.dispatch("lua", function(session, source, ...)
+			skynet.ret(skynet.pack(command(...)))
 	end)
-
-	skynet.register "dbpoll"
-end)
-]]
-
-local conf = {
-		host = "127.0.0.1" ,
-		port = 6379 ,
-		db = 0
-	}
-local db = redis.connect(conf)
-return db
+end
+)

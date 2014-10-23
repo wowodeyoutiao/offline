@@ -2,6 +2,7 @@ local monster = require "monster"
 local player = require "player"
 local damageflow = require "damageflow"
 
+
 local master = player.new(1)
 master.attri.criticalrate = 60
 master.attri.criticaldamage = 200
@@ -29,6 +30,15 @@ end
 local drop = mon:get_drop()
 if drop then
 	for _,v in ipairs(drop) do
-		master:add_bag(v)
+		master:addtobag(v)
 	end
 end
+local t = {"f", "g"}
+for i,v in ipairs(t) do
+	print(i,v)
+end
+
+local skynet = require "skynet"
+skynet.start(function()
+	skynet.abort()
+end)

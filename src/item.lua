@@ -1,8 +1,9 @@
 local item = {}
 local item_conf = require "item_conf"
-local db = require "db"
+--local db = require "db"
 local function getid()
-	return db:get("item.count")
+	return  1
+--	return db:get("item.count")
 end
 function item.new(name)
 	local titem = item_conf[name]

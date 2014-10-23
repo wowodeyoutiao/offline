@@ -44,7 +44,6 @@ function actor.new()
     t.armor = 0--护甲
     t.buff = {}
     t.magics = {}--技能
-    t.bag = {}--包裹
     t.equipments = {}--装备
     t.death = false
     t = {attri = t}

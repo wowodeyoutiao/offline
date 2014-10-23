@@ -13,18 +13,19 @@ function player.new(id)
 	t.spellmagicorder = {}
 	t.currentspellmagicorder = 1
 	t.maxspellmaigccount = 1
+	t.bag = {}--包裹
 	setmetatable(t, player)
 	if id and player_conf[id] then game_utils.copy_attri(t.attri, player_conf[id]) end
 	return t
 end
 
-function player:add_to_bag(item)
+function player:addtobag(item)
 	if item then
    		self.bag[item.id] = item
 	end
 end
 
-function player:del_to_bag(itemid)
+function player:delfrombag(itemid)
 	if self.bag[itemid] then
 		self.bag[itemid] = nil
 	end

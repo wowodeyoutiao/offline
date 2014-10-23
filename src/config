@@ -13,4 +13,6 @@ lualoader = "lualib/loader.lua"
 -- preload = "./examples/preload.lua"	-- run preload.lua before every lua service run
 snax = root.."examples/?.lua;"..root.."test/?.lua"
 cpath = root.."cservice/?.so"
+lua_path ="./lualib/?.lua;./lualib/?/init.lua;./../src/?.lua"
+dbpoolcount = 2
 -- daemon = "./skynet.pid"

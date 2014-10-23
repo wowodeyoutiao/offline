@@ -1,0 +1,12 @@
+local dbpool = {}
+skynet.start(function()
+	local dbpoolcount = skynet.getenv("dbpoolcount")
+	local current = 1
+	for i=1,dbpoolcount do
+		dbpool[i] = skynet.newservice "db"
+	end
+	skynet.dispatch("lua", function(session, source, ...)
+		skynet.ret(skynet.call(dbpool[current % dbpoolcount + 1], "lua", ...))
+		current = current + 1
+	end)
+end)
