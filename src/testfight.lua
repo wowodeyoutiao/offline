@@ -27,3 +27,8 @@ for i,v in ipairs(df) do
 end
 
 local drop = mon:get_drop()
+if drop then
+	for _,v in ipairs(drop) do
+		master:add_bag(v)
+	end
+end

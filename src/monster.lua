@@ -37,7 +37,6 @@ function monster:get_drop()
 				local it = item.new(v)
 				if it then
 					table.insert(t, it)
-					logger.log(""..v.."  in drop list")
 				else
 					logger.log("do not have "..v.." item in item_conf")
 				end

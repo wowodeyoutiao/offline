@@ -19,13 +19,15 @@ function player.new(id)
 end
 
 function player:add_to_bag(item)
-    table.insert(self.bag, item)
+	if item then
+   		self.bag[item.id] = item
+	end
 end
 
-function player:del_to_bag(item)
-    for i,v in ipairs(self.bag) do
-        if v == item then table.remove(self.bag, i) end
-    end
+function player:del_to_bag(itemid)
+	if self.bag[itemid] then
+		self.bag[itemid] = nil
+	end
 end
 
 function player:set_spell_magic_order(skillid, order)
