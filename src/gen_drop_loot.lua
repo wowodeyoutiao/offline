@@ -10,7 +10,7 @@ return function()
 			first = string.sub(v1, 1, m - 1)				
 			second = string.sub(v1, n + 1, string.len(v1))
 			s1 = '\tlocal v = math.random(1,'..second..') \n'..
-			'\tif v < ' .. first ..' then table.insert(ret, "'..k..'") end \n'
+			'\tif v <= ' .. first ..' then table.insert(ret, "'..k..'") end \n'
 			s = s..s1
 		end
 		s = s..'\treturn ret\n end\n'

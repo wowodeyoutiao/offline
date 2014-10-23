@@ -1,4 +1,4 @@
-local fight_scene_conf = {
+	local fight_scene_conf = {
 	1 = {
 		round_monster_count = 2
 		fight_rate = 10

@@ -1,16 +1,16 @@
 local player_conf = {
-	job_count = 2
+	job_count = 2,
 	default_male_warrior = {
 		level = 1,
 		job = 1,
-		hp = 100,
+		hp = 2000,
 		mp = 100,
 		physicaldamage = 100
 	},
 	default_female_warrior = {
 	level = 1,
 	job = 2,
-	hp = 998,
+	hp = 2000,
 	mp = 889,
 	physicaldamage = 80
 }

@@ -1,4 +1,5 @@
 local buff = require "buff"
+local damageflow =  require "damageflow"
 
 local actor = {
     --[[
@@ -17,17 +18,16 @@ local actor = {
     magicalresistance = 0,--魔法抗性
     armor = 0,--护甲
     buff = {},
-    skills = {},--技能
+    magics = {},--技能
     bag = {},--包裹
     equipments = {},--装备
     ]]
 }
 
 actor.__index = actor
-
+local actorid = 1
 function actor.new()
     local t = {}
-    t.name = 'anmeng'
     t.level = 0
     t.currentexperience = 0
     t.maxexperience = 0
@@ -43,12 +43,16 @@ function actor.new()
     t.magicalresistance = 0--魔法抗性
     t.armor = 0--护甲
     t.buff = {}
-    t.skills = {}--技能
+    t.magics = {}--技能
     t.bag = {}--包裹
     t.equipments = {}--装备
     t.death = false
-    setmetatable({attri = t}, actor)
-    return t
+    t = {attri = t}
+    t.name = "anmeng"
+    t.id = actorid
+    actorid = actorid + 1
+    math.randomseed(os.time())
+    return setmetatable(t, actor)
 end
 
 function actor:clone(cloner)
@@ -66,18 +70,17 @@ function actor:isalive()
 end
 
 function actor:getphysicaldamage()
-    local damage = 0
-    damage = self.attri.physicaldamage
-    local rate = math.random()
-    if rate < self.attri.criticalrate then
-        damage = damage + damage * self.attri.criticaldamage * rate 
-        return true, damage
+    local damage = self.attri.physicaldamage
+    local rate = math.random(1, 100)
+    if rate <= self.attri.criticalrate then
+        damage = damage + damage * self.attri.criticaldamage * rate / 10000
+        return damageflow.criticaldamage, damage
     end
-    return false, damage
+    return damageflow.damage, damage
 end
 
-function actor:beingphysicalattack(damage)
-    damage = damge - self.attri.armor
+function actor:beingphysicaldamage(damage)
+    damage = damage - self.attri.armor
     self.attri.hp = self.attri.hp - damage
     return damage
 end
@@ -117,14 +120,30 @@ function actor:del_equipment(equipment)
     self.equipments[equipment.position] = nil
 end
 
-function actor:add_skill(skill)
-    table.insert(self.skill, skill)
+function actor:add_magic(magic)
+    self.magics[magic.id] = magic
 end
 
-function actor:del_skill(skill)
-    for i,v in ipairs(self.skill) do
-        if v == skill then table.remove(self.skill, i) end
+function actor:get_magic(magicid)
+    return self.magics[magicid]
+end
+
+function actor:del_magic(magiclid)
+    self.magics[magicid] = nil
+end
+
+function actor:spell_magic(magicid)
+    if self.magics[magicid] then
+	return self.magics[magicid]:spell()
     end
+end
+
+function actor:fight(target, df)
+    local damagetype ,damage = self:getphysicaldamage()
+    if damagetype ~= damageflow.none then
+	   damage = target:beingphysicaldamage(damage)
+	   damageflow.add(df, damagetype, self.id, target.id, damage)
+	end
 end
 
 return actor
