@@ -24,7 +24,8 @@ end
 
 local actors = {[master.id] = master, [mon.id] = mon}
 for i,v in ipairs(df) do
-	print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用".. damageflow.get_damage_string(v.type).."造成"..v.damage.."伤害")
+	print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用".. 
+		damageflow.get_damage_name(v.type).."造成"..v.damage..damageflow.get_damage_type(v.type))
 end
 
 local drop = mon:get_drop()
@@ -32,10 +33,6 @@ if drop then
 	for _,v in ipairs(drop) do
 		master:addtobag(v)
 	end
-end
-local t = {"f", "g"}
-for i,v in ipairs(t) do
-	print(i,v)
 end
 
 local skynet = require "skynet"

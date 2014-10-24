@@ -33,8 +33,8 @@ function actor.new()
     t.maxexperience = 0
     t.hp = 0--体力值
     t.mp = 0--魔法值
-    t.hprate = 0 --每秒回血
-    t.mprate = 0 --每秒回蓝
+    t.hprate = 0 --每秒回血or每回合回血
+    t.mprate = 0 --每秒回蓝or每回合回血
     t.criticaldamage = 0--暴击最高伤害
     t.criticalrate = 0--暴击概率
     t.physicaldamage = 0--物理伤害
@@ -107,7 +107,7 @@ function actor:check_buff(time)
             v = nil
         end
     end 
-end 
+end
 
 function actor:add_equipment(equipment)
     equipment:add_attri(self)

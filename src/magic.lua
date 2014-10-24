@@ -1,8 +1,9 @@
 local magic = {}
-local magic_conf = require "magic_conf"
+local item_conf = require "item_conf"
 
 function magic.new(name)
-	local tmagic = magic_conf[name]
+	assert(item_conf[name])
+	local tmagic = item_conf[name].magic
 	if tmagic then
 		local t = setmetatable({}, magic)
 		for k,v in pairs(tmagic) do
