@@ -1,14 +1,15 @@
-local f = {
-	e = {
-		g = 22
-	}
-}
-local t = {}
-for k,v in pairs(f) do
-	t[k] = v
-end
-for k,v in pairs(t) do
-	for k1,v1 in pairs(v) do
-		print(k1, v1)
-	end
+a = {}; 
+b = {};    
+setmetatable(a,b); -- 设置a为weak table 
+b.__mode = 'k'; 
+
+
+a[1] = {} -- weak table引用不增引数，所以"{}"内存块的引数还为1 
+a[2] = {}     -- 如上上一样 
+a[2] = nil
+
+collectgarbage();   -- 调用GC，清掉weak表中没有引用的内存 
+print(#a)
+for k,v in pairs(a) do
+	print(k,v)
 end

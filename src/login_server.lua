@@ -1,28 +1,26 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
-local redis = require "redis"
+local socket = require "socket"
+
 local login_server = {}
-local db 
-local function _encode(str)
-    return string.format("%%%02X",string.byte(str))
+local host
+local send_request
+
+local client_fd = {}
+
+function db_call(cmd, ...)
+	return skynet.call("db", "lua", cmd, ...)
 end
 
-function emailEncode(str)
-    return string.gsub(str,"([^%w_@.])",_encode)
+function db_send(cmd, ...)
+	skynet.send("db", "lua", cmd, ...)
 end
 
-local function _decode(str)
-    return string.char(tonumber(str,16))
-end
-
-function emailDecode(str)
-    return string.gsub(str,"%%(%w%w)",_decode)
-end
 function login_server.auth(username, password)
 	local name = "account."..username
-	local id = db:get(name)
+	local id = db_call("get", name)
 	if id then
-		local pw = db:get(name..id..".password")
+		local pw = db_call("get",name..id..".password")
 		if password == pw then return id end
 	end
 	return false
@@ -30,12 +28,12 @@ end
 
 function login_server.new_account(name, password)
 	local account = "account."..name
-	local ok = db:exists(account)
+	local ok = db_call("exists", account)
 	if not ok then
-		local id = db:incr("account.count")
-		db:set(account, id)
-		db:set(account..id..".password", password)
-		db:rpush("account.userlist", id)
+		local id = db_call("incr", "account.count")
+		db_call("set", account, id)
+		db_call("set", account..id..".password", password)
+		db_call("rpush", "account.userlist", id)
 		return true
 		
 	else
@@ -52,31 +50,85 @@ end
 
 function login_server.create_actor(id, name)
 	local actor = "actor."..name
-	local ok = db:exists(actor)
+	local ok = db_call("exists", actor)
 	if not ok then		
-		local actorid = db:incr("actor.count")
-		db:set(actor, actorid)
-		--db:set("actor."..actorid, id)
-		db:sadd("account."..id..".actors", actorid)
+		local actorid = db_call("incr", "actor.count")
+		db_call("set", actor, actorid)
+		db_call("sadd", "account."..id..".actors", actorid)
 		return actorid
 	end
 	return -1
 end
 
-function login_server.start()
-	local conf = {
-		host = "127.0.0.1" ,
-		port = 6379 ,
-		db = 0
-	}
-	db = redis.connect(conf)
-	local ok  = db:exists "account.count"
-	if not ok then db:set("account.count", "0")  end
-	ok = db:exists("actor.count")
-	if not ok then db:set("actor.count", "0") end
-	print("start login server")
-	return true
+function login_server.start(gate, proto)
+	host = sproto.new(proto.c2s):host "package"
+	send_request = host:attach(sproto.new(proto.s2c))
 end
+
+function login_server.open(fd)
+	client_fd[fd] = fd
+	skynet.call(gate, "lua", "forward", fd)
+end
+
+function REQUEST:createaccount()
+	print("createaccount", self.username, self.password)
+	local r = login_server.new_account(self.username, self.password)
+	if not r then
+		return {ok = false}
+	else
+		return {ok = true}
+	end
+end
+
+function REQUEST:login()
+	print("login", self.username, self.password)
+	local r = login_server.auth(self.username, self.password)
+	if not r then
+		return {ok = false}
+	else
+		return { ok = true, id = r}
+	end
+end
+
+local function request(name, args, response)
+	local f = assert(REQUEST[name])
+	local r = f(args)
+	if response then
+		return response(r)
+	end
+end
+
+local function send_package(pack)
+	local size = #pack
+	local package = string.char(bit32.extract(size,8,8)) ..
+		string.char(bit32.extract(size,0,8))..
+		pack
+
+	socket.write(client_fd, package)
+end
+
+skynet.register_protocol {
+	name = "client",
+	id = skynet.PTYPE_CLIENT,
+	unpack = function (msg, sz)
+		return host:dispatch(msg, sz)
+	end,
+	dispatch = function (_, _, type, ...)
+		if type == "REQUEST" then
+			local ok, result  = pcall(request, ...)
+			if ok then
+				if result then
+					send_package(result)
+				end
+			else
+				skynet.error(result)
+			end
+		else
+			assert(type == "RESPONSE")
+			error "This example doesn't support request client"
+		end
+	end
+}
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
@@ -84,4 +136,14 @@ skynet.start(function()
 			skynet.ret(skynet.pack(f(...)))
 	end)
 	skynet.register "login_server"
+	local ok  = db_call("exists", "account.count")
+	if not ok then 
+		db_send("set", "account.count", "0")
+	end
+	ok = db_call("exists", "actor.count")
+	if not ok then 
+		db_send("set", "actor.count", "0")
+	end
+	print("start login server")
+	
 end)

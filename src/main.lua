@@ -7,7 +7,9 @@ skynet.start(function()
 	local console = skynet.newservice("console")
 	skynet.newservice("debug_console",8000)
 	
-	pcall(skynet.newservice, "testfight")
+	--pcall(skynet.newservice, "testfight")
+	skynet.newservice "dbpool" --启动db 
+	skynet.newservice "login_server"
 	local watchdog = skynet.newservice("watchdog")
 	skynet.call(watchdog, "lua", "start", {
 		port = 8888,

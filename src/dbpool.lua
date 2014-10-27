@@ -9,4 +9,5 @@ skynet.start(function()
 		skynet.ret(skynet.call(dbpool[current % dbpoolcount + 1], "lua", ...))
 		current = current + 1
 	end)
+	skynet.register "db"
 end)

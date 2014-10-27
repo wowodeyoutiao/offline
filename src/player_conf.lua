@@ -1,5 +1,5 @@
 local player_conf = {
-	job_count = 2,
+	job_count = 4,
 	default_male_warrior = {
 		level = 1,
 		job = 1,
@@ -13,7 +13,21 @@ local player_conf = {
 	hp = 2000,
 	mp = 889,
 	physicaldamage = 80
-}
+	}
+	default_male_magician = {
+		level = 1,
+		job = 4,
+		hp = 2000,
+		mp = 100,
+		physicaldamage = 100
+	},
+	default_female_magician = {
+	level = 1,
+	job = 8,
+	hp = 2000,
+	mp = 889,
+	physicaldamage = 80
+	}
 }
 player_conf[1] = player_conf.default_male_warrior
 player_conf[2] = player_conf.default_female_warrior
