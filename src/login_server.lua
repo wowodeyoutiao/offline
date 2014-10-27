@@ -114,12 +114,11 @@ skynet.register_protocol {
 		return host:dispatch(msg, sz)
 	end,
 	dispatch = function (session, source, type, ...)
-		print( "dispatch",source, session)
 		if type == "REQUEST" then
 			local ok, result  = pcall(request, ...)
 			if ok then
 				if result then
-					send_package(fd, result)
+					send_package(source, result)
 				end
 			else
 				skynet.error(result)
