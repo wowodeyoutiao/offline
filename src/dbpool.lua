@@ -5,6 +5,7 @@ skynet.start(function()
 	local current = 1
 	for i=1,dbpoolcount do
 		dbpool[i] = skynet.newservice "db"
+		print("db"..dbpoolcount)
 	end
 	skynet.dispatch("lua", function(session, source, ...)
 		skynet.ret(skynet.call(dbpool[current % dbpoolcount + 1], "lua", ...))

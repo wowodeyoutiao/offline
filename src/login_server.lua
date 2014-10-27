@@ -2,6 +2,7 @@ local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
 
+local  REQUEST = {}
 local login_server = {}
 local host
 local send_request
@@ -138,11 +139,11 @@ skynet.start(function()
 	skynet.register "login_server"
 	local ok  = db_call("exists", "account.count")
 	if not ok then 
-		db_send("set", "account.count", "0")
+		db_call("set", "account.count", "0")
 	end
 	ok = db_call("exists", "actor.count")
 	if not ok then 
-		db_send("set", "actor.count", "0")
+		db_call("set", "actor.count", "0")
 	end
 	print("start login server")
 	
