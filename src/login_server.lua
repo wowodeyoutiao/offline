@@ -11,8 +11,6 @@ local send_request
 local db
 local gate
 
-local client_fd = {}
-
 function db_call(cmd, ...)
 	return db[cmd](db, ...)
 end
@@ -69,8 +67,7 @@ end
 
 function login_server.open(fd)
 	print ( "client: "..fd)
-	client_fd[fd] = fd
-	skynet.call(gate, "lua", "forward", fd)
+	skynet.call(gate, "lua", "forward", fd, fd)
 end
 
 function REQUEST:createaccount()
