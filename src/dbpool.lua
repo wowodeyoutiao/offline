@@ -1,3 +1,4 @@
+local skynet = require "skynet"
 local dbpool = {}
 skynet.start(function()
 	local dbpoolcount = skynet.getenv("dbpoolcount")
