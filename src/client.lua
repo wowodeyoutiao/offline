@@ -6,6 +6,8 @@ local bit32 = require "bit32"
 local proto = require "proto"
 local sproto = require "sproto"
 
+local sessionpool = {}
+
 local host = sproto.new(proto.s2c):host "package"
 local request = host:attach(sproto.new(proto.c2s))
 
@@ -51,11 +53,11 @@ end
 
 local session = 0
 
-local function send_request(name, args)
-	session = session + 1
-	local str = request(name, args, session)
-	send_package(fd, str)
-	print("Request:", session)
+local function send_request(name, args, func)
+		session = session + 1
+		sessionpool[session] = func
+		local str = request(name, args, session)
+		send_package(fd, str)	
 end
 
 local last = ""
@@ -69,12 +71,11 @@ local function print_request(name, args)
 	end
 end
 
-local function print_response(session, args)
-	print("RESPONSE", session)
-	if args then
-		for k,v in pairs(args) do
-			print(k,v)
-		end
+local function print_response(session1, args)
+	print("rsession"..session1)
+	if (sessionpool[session1]) then
+		sessionpool[session1](args)
+		sessionpool[session1] = nil
 	end
 end
 
@@ -84,6 +85,7 @@ local function print_package(t, ...)
 	else
 		assert(t == "RESPONSE")
 		print_response(...)
+
 	end
 end
 
@@ -98,8 +100,11 @@ local function dispatch_package()
 		print_package(host:dispatch(v))
 	end
 end
-
-send_request("createaccount", { username = "anmeng", password = "iloveyou" })
+send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)
+	print(args.ok)
+end)
+--send_request("login", { username = "anmeng", password = "iloveyou" })
+--send_request("createplayer", { username = "anmeng", job = 1, id = 1 })
 while true do
 	dispatch_package()
 	local cmd = socket.readstdin()
