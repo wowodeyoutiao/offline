@@ -1,5 +1,5 @@
 package.cpath = "./../skynet/luaclib/?.so"
-package.path = "./../skynet/lualib/?.lua;"
+package.path =package.path.. ";./../skynet/lualib/?.lua;"
 
 local socket = require "clientsocket"
 local bit32 = require "bit32"
@@ -99,7 +99,7 @@ local function dispatch_package()
 	end
 end
 
-send_request("createaccount", { username = "anmeng", value = "iloveyou" })
+send_request("createaccount", { username = "anmeng", password = "iloveyou" })
 while true do
 	dispatch_package()
 	local cmd = socket.readstdin()

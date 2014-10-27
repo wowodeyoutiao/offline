@@ -21,7 +21,6 @@ skynet.start(function()
 		dbs[i] = redis.connect(db_conf[i])
 	end
 	skynet.dispatch("lua", function(session, source, ...)
-		print (...)
 		skynet.ret(skynet.pack(command(...)))
 	end)
 end

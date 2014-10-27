@@ -2,12 +2,14 @@ local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
 local redis = require "redis"
+local sproto = require  "sproto"
 
 local  REQUEST = {}
 local login_server = {}
 local host
 local send_request
 local db
+local gate
 
 local client_fd = {}
 
@@ -59,12 +61,14 @@ function login_server.create_actor(id, name)
 	return -1
 end
 
-function login_server.start(gate, proto)
+function login_server.start(g, proto)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c))
+	gate = g
 end
 
 function login_server.open(fd)
+	print ( "client: "..fd)
 	client_fd[fd] = fd
 	skynet.call(gate, "lua", "forward", fd)
 end
@@ -97,13 +101,13 @@ local function request(name, args, response)
 	end
 end
 
-local function send_package(pack)
+local function send_package(fd, pack)
 	local size = #pack
 	local package = string.char(bit32.extract(size,8,8)) ..
 		string.char(bit32.extract(size,0,8))..
 		pack
 
-	socket.write(client_fd, package)
+	socket.write(fd, package)
 end
 
 skynet.register_protocol {
@@ -112,12 +116,13 @@ skynet.register_protocol {
 	unpack = function (msg, sz)
 		return host:dispatch(msg, sz)
 	end,
-	dispatch = function (_, _, type, ...)
+	dispatch = function (session, source, type, ...)
+		print( "dispatch",source, session)
 		if type == "REQUEST" then
 			local ok, result  = pcall(request, ...)
 			if ok then
 				if result then
-					send_package(result)
+					send_package(fd, result)
 				end
 			else
 				skynet.error(result)
@@ -135,20 +140,20 @@ skynet.start(function()
 			skynet.ret(skynet.pack(f(...)))
 	end)
 	skynet.register "login_server"
-	db = redis:connect({
+	db = redis.connect({
 		host = "127.0.0.1" ,
 		port = 6379 ,
 		db = 0
 	})
 		
-	local ok  = db_call("exists", "account.count")
+	local ok  = db:exists("account.count")
 	if not ok then 
-		db_call("set", "account.count", "0")
+		db:set( "account.count", "0")
 	end
-	ok = db_call("exists", "actor.count")
+	ok = db:exists("actor.count")
 	if not ok then 
-		db_call("set", "actor.count", "0")
+		db:set( "actor.count", "0")
 	end
-	print("start login server")
+	print("start login server ok")
 	
 end)
