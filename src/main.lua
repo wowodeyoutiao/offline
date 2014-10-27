@@ -9,7 +9,7 @@ skynet.start(function()
 	
 	--pcall(skynet.newservice, "testfight")
 	skynet.newservice "dbpool" --启动db 
-	skynet.newservice "login_server"
+	skynet.newservice "account_server"
 	local watchdog = skynet.newservice("watchdog")
 	skynet.call(watchdog, "lua", "start", {
 		port = 8888,

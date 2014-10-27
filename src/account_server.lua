@@ -14,7 +14,7 @@ function db_call(cmd, ...)
 	return db[cmd](db, ...)
 end
 
-function login_server.auth(username, password)
+local function auth(username, password)
 	local name = "account."..username
 	local id = db_call("get", name)
 	if id then
@@ -24,7 +24,7 @@ function login_server.auth(username, password)
 	return false
 end
 
-function login_server.new_account(name, password)
+local function new_account(name, password)
 	local account = "account."..name
 	local ok = db_call("exists", account)
 	if not ok then
@@ -38,21 +38,21 @@ function login_server.new_account(name, password)
 		return false
 	end
 end
-
-function login_server.start(g, proto)
+local account_server = {}
+function account_server.start(g, proto)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c))
 	gate = g
 end
 
-function login_server.open(fd)
+function account_server.open(fd)
 	print ( "client: "..fd)
 	skynet.call(gate, "lua", "forward", fd, fd)
 end
 
 function REQUEST:createaccount()
 	print("createaccount", self.username, self.password)
-	local r = login_server.new_account(self.username, self.password)
+	local r = new_account(self.username, self.password)
 	if not r then
 		return {ok = false}
 	else
@@ -62,7 +62,7 @@ end
 
 function REQUEST:login()
 	print("login", self.username, self.password)
-	local r = login_server.auth(self.username, self.password)
+	local r = auth(self.username, self.password)
 	if not r then
 		return {ok = false}
 	else
@@ -111,6 +111,10 @@ skynet.register_protocol {
 }
 
 skynet.start(function()
+	skynet.dispatch("lua", function(_, _, cmd, ...)
+		local f = assert(account_server[cmd])
+		if f then f(...) end 
+	end)
 	db = redis.connect({
 		host = "127.0.0.1" ,
 		port = 6379 ,
