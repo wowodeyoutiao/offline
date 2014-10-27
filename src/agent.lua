@@ -66,16 +66,21 @@ skynet.register_protocol {
 	end
 }
 
+function CMD.create_actor(id, name)
+	local actor = "actor."..name
+	local ok = db_call("exists", actor)
+	if not ok then		
+		local actorid = db_call("incr", "actor.count")
+		db_call("set", actor, actorid)
+		db_call("sadd", "account."..id..".actors", actorid)
+		return actorid
+	end
+	return -1
+end
+
 function CMD.start(gate, fd, proto)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c))
-	skynet.fork(function()
-		while true do
-			send_package(send_request "heartbeat")
-			skynet.sleep(500)
-		end
-	end)
-
 	client_fd = fd
 	skynet.call(gate, "lua", "forward", fd)
 end

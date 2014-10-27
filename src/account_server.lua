@@ -5,7 +5,6 @@ local redis = require "redis"
 local sproto = require  "sproto"
 
 local  REQUEST = {}
-local login_server = {}
 local host
 local send_request
 local db
@@ -40,25 +39,6 @@ function login_server.new_account(name, password)
 	end
 end
 
-function login_server.get_password(name)
-end
-
-function login_server.get_actors(name)
-
-end
-
-function login_server.create_actor(id, name)
-	local actor = "actor."..name
-	local ok = db_call("exists", actor)
-	if not ok then		
-		local actorid = db_call("incr", "actor.count")
-		db_call("set", actor, actorid)
-		db_call("sadd", "account."..id..".actors", actorid)
-		return actorid
-	end
-	return -1
-end
-
 function login_server.start(g, proto)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c))
@@ -86,6 +66,7 @@ function REQUEST:login()
 	if not r then
 		return {ok = false}
 	else
+		skynet.call("watchdag", "lua", "forward", fd)
 		return { ok = true, id = r}
 	end
 end
@@ -103,7 +84,6 @@ local function send_package(fd, pack)
 	local package = string.char(bit32.extract(size,8,8)) ..
 		string.char(bit32.extract(size,0,8))..
 		pack
-
 	socket.write(fd, package)
 end
 
@@ -131,11 +111,6 @@ skynet.register_protocol {
 }
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, source, cmd, ...)
-			local f = assert(login_server[cmd])
-			skynet.ret(skynet.pack(f(...)))
-	end)
-	skynet.register "login_server"
 	db = redis.connect({
 		host = "127.0.0.1" ,
 		port = 6379 ,
@@ -150,6 +125,6 @@ skynet.start(function()
 	if not ok then 
 		db:set( "actor.count", "0")
 	end
-	print("start login server ok")
-	
+	print("start account server ok")
+	skynet.register "account_server"
 end)

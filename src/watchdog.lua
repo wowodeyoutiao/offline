@@ -10,10 +10,7 @@ local gate
 local agent = {}
 
 function SOCKET.open(fd, addr)
-	skynet.call("login_server", "lua", "open", fd)
-	
-	--agent[fd] = skynet.newservice("agent")
-	--skynet.call(agent[fd], "lua", "start", gate, fd, proto)
+	skynet.call("account_server", "lua", "open", fd)
 end
 
 local function close_agent(fd)
@@ -39,7 +36,12 @@ end
 
 function CMD.start(conf)
 	skynet.call(gate, "lua", "open" , conf)
-	skynet.call("login_server", "lua", "start", gate, proto)
+	skynet.call("account_server", "lua", "start", gate, proto)
+end
+
+function  CMD.startagent(fd)
+	agent[fd] = skynet.newservice("agent")
+	skynet.call(agent[fd], "lua", "start", gate, fd, proto)
 end
 
 skynet.start(function()
@@ -53,6 +55,7 @@ skynet.start(function()
 			skynet.ret(skynet.pack(f(subcmd, ...)))
 		end
 	end)
+	skynet.register "watchdog"
 
 	gate = skynet.newservice("gate")
 end)

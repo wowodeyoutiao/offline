@@ -67,7 +67,7 @@ createaccount 2 {
 createplayer 3 {
 	request {
 		username 0: string
-		password 1: string
+		job 1: integer
 		id  2: integer
 	}
 	response {
