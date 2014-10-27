@@ -1,20 +1,18 @@
 local skynet = require "skynet"
 local netpack = require "netpack"
 local socket = require "socket"
+local redis = require "redis"
 
 local  REQUEST = {}
 local login_server = {}
 local host
 local send_request
+local db
 
 local client_fd = {}
 
 function db_call(cmd, ...)
-	return skynet.call("db", "lua", cmd, ...)
-end
-
-function db_send(cmd, ...)
-	skynet.send("db", "lua", cmd, ...)
+	return db[cmd](db, ...)
 end
 
 function login_server.auth(username, password)
@@ -137,6 +135,12 @@ skynet.start(function()
 			skynet.ret(skynet.pack(f(...)))
 	end)
 	skynet.register "login_server"
+	db = redis:connect({
+		host = "127.0.0.1" ,
+		port = 6379 ,
+		db = 0
+	})
+		
 	local ok  = db_call("exists", "account.count")
 	if not ok then 
 		db_call("set", "account.count", "0")
