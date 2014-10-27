@@ -1,5 +1,4 @@
-##a skynet demo,
-coding, do not completely.
+##a skynet demo, like progress quest.  
+do not completely.  
 ##run
-cd /skynet make macosx   
-./skynet ./../src/config
+./run.sh
