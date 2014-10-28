@@ -68,11 +68,11 @@ createaccount 2 {
 createplayer 3 {
 	request {		
 		id  0: integer
-		username 0: string
-		job 1: integer
+		username 1: string
+		job 2: integer
 	}
 	response {
-		ok 0: boolean
+		id 0: integer
 	}
 }
 

@@ -23,22 +23,9 @@ local function send_package(fd, pack)
 	socket.send(fd, package)
 end
 
-local function unpack_package(text)
-	local size = #text
-	if size < 2 then
-		return nil, text
-	end
-	local s = text:byte(1) * 256 + text:byte(2)
-	if size < s+2 then
-		return nil, text
-	end
-
-	return text:sub(3,2+s), text:sub(3+s)
-end
-
 local function recv_package(last)
 	local result
-	result, last = unpack_package(last)
+	
 	if result then
 		return result, last
 	end
@@ -92,6 +79,10 @@ end
 
 local function dispatch_package()
 	while true do
+		local size = socket.recv(fd)
+		if size ~= 0 then break end
+	end
+	while true do
 		local v
 		v, last = recv_package(last)
 		if not v then
@@ -106,7 +97,7 @@ end
 send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)print(args.ok)end)
 socket.usleep(1000)
 send_request("login", { username = "anmeng", password = "iloveyou" })
-socket.usleep(1000)
+socket.usleep(5000)
 send_request("createplayer", { username = "anmeng", job = 1, id = 1 }, function (args)
 	if args.ok ~= true then print "create actor fail" end
 end)
@@ -128,13 +119,13 @@ end
 
 
 function getfightround()
-	send_request("getplayerinfo", { id = 1 }, function (args)
+	send_request("getfightround", { id = 1 }, function (args)
 		mon = args.monster
 		df = args.damageflow
 	end)	
 end
-getplayerinfo()
-getfightround() 
+--getplayerinfo()
+--getfightround() 
 while true do
 	dispatch_package()
 	if player and mon then
@@ -145,15 +136,12 @@ while true do
 			print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用".. 
 		damageflow.get_damage_name(v.type).."造成"..v.damage..damageflow.get_damage_type(v.type))
 		end
-		print("休息："..tostring(player.fightrate * 1000)
+		print("休息："..tostring(player.fightrate * 1000))
 		socket.usleep(player.fightrate * 1000)
 		player = nil
 		mon = nil
 		df = nil
 		getplayerinfo()
 		getfightround() 
-	end
-
-	
 	end
 end

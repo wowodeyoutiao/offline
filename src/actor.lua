@@ -56,10 +56,15 @@ end
 
 function actor:clone(cloner)
     if cloner then
-        game_utils.copy_attri(cloner.attri, self.attri, true)
+        for k,v in pairs(self) do
+            cloner[k] = v
+        end
     else
         local t = {}
-        game_utils.copy_attri(t.attri, self.attri, true)
+        for k,v in pairs(self) do
+            t[k] = v
+        end
+        setmetatable(t, actor)
         return t
     end
 end
@@ -139,6 +144,7 @@ end
 
 function actor:fight(target, df)
     local damagetype ,damage = self:getphysicaldamage()
+    print (damagetype, damage)
     if damagetype ~= damageflow.none then
 	   damage = target:beingphysicaldamage(damage)
 	   damageflow.add(df, damagetype, self.id, target.id, damage)

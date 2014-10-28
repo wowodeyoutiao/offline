@@ -30,7 +30,7 @@ local function new_account(name, password)
 	if not ok then
 		local id = db_call("incr", "account.count")
 		db_call("set", account, id)
-		db_call("set", account..id..".password", password)
+		db_call("set", account.."."..id..".password", password)
 		db_call("rpush", "account.userlist", id)
 		return true
 		
@@ -66,12 +66,13 @@ function REQUEST:login()
 	if not r then
 		return {ok = false}
 	else
-		skynet.call("watchdag", "lua", "forward", fd)
+		
 		return { ok = true, id = r}
 	end
 end
 
 local function request(name, args, response)
+	print("request", name)
 	local f = assert(REQUEST[name])
 	local r = f(args)
 	if response then
@@ -86,7 +87,11 @@ local function send_package(fd, pack)
 		pack
 	socket.write(fd, package)
 end
-
+function proc_login(fd, name)
+	if name == "login" then 
+		skynet.call("watchdog", "lua", "startagent", fd)	
+	end
+end
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
@@ -97,6 +102,7 @@ skynet.register_protocol {
 		if type == "REQUEST" then
 			local ok, result  = pcall(request, ...)
 			if ok then
+				proc_login(source, ...)
 				if result then
 					send_package(source, result)
 				end

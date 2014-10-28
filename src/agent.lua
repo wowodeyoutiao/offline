@@ -12,32 +12,38 @@ local REQUEST = {}
 local client_fd
 
 function db_call(cmd, ...)
-	return skynet.call('db', lua, cmd, ...)
+	return false
+	--return skynet.call("db", lua, cmd, ...)
 end
 
 function REQUEST:getplayerinfo()
-	print("get", self.what)
-	local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
-	return { result = r }
+	print("getplayerinfo", self.id)
+	local r = skynet.call("fightscene", "lua", "get_player", self.id)
+	return { ok = true ,player = r }
 end
 
 function REQUEST:getfightround()
-	print("set", self.what, self.value)
-	local r = skynet.call("SIMPLEDB", "lua", "set", self.what, self.value)
+	print("getfightround", self.id)
+	local r = skynet.call("fightscene", "lua", "getfightround", self.id)
+	return {monster = r.monster, damageflow = r.damageflow}
 end
 
-function REQUEST.createplayer(id, name, job)
+function REQUEST.createplayer(self)
+	local id = self.id
+	local name = self.username
+	local job = self.job
 	local actor = "actor."..name
 	local ok = db_call("exists", actor)
 	if not ok then		
 		local actorid = db_call("incr", "actor.count")
 		db_call("set", actor, actorid)
 		db_call("sadd", "account."..id..".actors", actorid)
-		local ok = skynet.call("fightscene", "lua", "new_actor", actorid, name, job)
-		if ok then return actorid end
-		return -1
+		actorid = 1
+		local ok = skynet.call("fightscene", "lua", "new_player", actorid, name, job)
+		if ok then return {id = actorid} end
+		return {id = -1}
 	end
-	return -1
+	return {id = -1}
 end
 
 local function request(name, args, response)
@@ -65,6 +71,7 @@ skynet.register_protocol {
 	end,
 	dispatch = function (_, _, type, ...)
 		if type == "REQUEST" then
+			print("agent: ",...)
 			local ok, result  = pcall(request, ...)
 			if ok then
 				if result then

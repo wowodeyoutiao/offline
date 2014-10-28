@@ -4,7 +4,7 @@ local equipment = {
 totalid = 1
 }
 --get a new equipment
-local function equipment.new(id)
+function equipment.new(id)
 	assert(item_conf[id])
 	local t = setmetatable({}, equipment)
 	t.id = equipment.totalid	
@@ -15,11 +15,11 @@ local function equipment.new(id)
 	return t
 end
 
-local function equipment:add_attri(actor)
+function equipment:add_attri(actor)
 	game_utils.add_attri(actor.attri, self)
 end
 
-local function equipment:del_attri(actor)
+function equipment:del_attri(actor)
 	game_utils.del_attri(actor.attri, self)
 end
 

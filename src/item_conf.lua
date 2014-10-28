@@ -5,13 +5,13 @@ local damageflow = require "damageflow"
 	
 local  item_conf = {
 	NECKLACE = 1,
-	LEFTRING = 2，
-	RIGHTRING= 3，
-	SHOE= 4，
-	BELT= 5，
-	HELMET = 6，
-	DRESS= 7，
-	WEAPON = 8,
+	["LEFTRING"] = 2,
+	["RIGHTRING"]= 3,
+	["SHOE"]= 4,
+	["BELT"]= 5,
+	["HELMET"] = 6,
+	["DRESS"]= 7,
+	["WEAPON"] = 8,
 	["暴击术"] = {
 		id = 1,
 		type = 1,
@@ -31,7 +31,7 @@ local  item_conf = {
 			nextlevelexp = 0,
 			getnextlevelexp = function(level)
 				return 200 + level * 100
-			end
+			end,
 			damage = function(owner, lv)
 				return damageflow.criticalmagic, owner.physicaldamage * (lv + 1)
 			end
@@ -39,7 +39,7 @@ local  item_conf = {
 	},
 	["布衣(男)"] = {
 		id = 2,
-		position = NECKLACE，
+		position = NECKLACE,
 		name = '布衣(男)',
 		job = 0,
 		need = {

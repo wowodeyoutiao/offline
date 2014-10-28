@@ -13,7 +13,7 @@ local player_conf = {
 	hp = 2000,
 	mp = 889,
 	physicaldamage = 80
-	}
+	},
 	default_male_magician = {
 		level = 1,
 		job = 4,
