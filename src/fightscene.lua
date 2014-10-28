@@ -13,6 +13,7 @@ local  CMD = {}
 local fightscene = {}
 local ordinary_monster = {}
 local boss_monster = {}
+local db
 
 function gen_monster(monster_conf, list)
 	for k,v in pairs(monster_conf) do
@@ -72,14 +73,6 @@ function fightscene.fight()
 	end
 end
 
-function fightscene.save_player(player)
-		redis:multi()
-		for k,v in pairs(player.attri) do
-			redis:hset("actor."..playerid..".attri",k, v)
-		end
-		redis:exec()
-end
-
 function fightscene.startscene(player, id)
 	if not fightscene[id] then return false end
 	fightscene[id][player.id] = player
@@ -98,13 +91,33 @@ function CMD.changescene(player, id)
 	return false
 end
 
-function CMD.new_player(playerid, job)
-	if job and (job > 0) and (job < player_conf.job_count) then
+function CMD.new_player(playerid, name, job)
+	if job and player_conf[job] then
 		local newplayer = player.new(player_conf[job])
 		newplayer.id = playerid
-		fightround.save_player(newplayer)
 		fightscene.startscene(newplayer, 1)
+		return true
 	end
+	return false
+end
+
+function CMD.load_player(playerid)
+	--[[
+	local player = {}
+	db:multi()
+	for k,v in pairs(player.attri) do
+		db:gset("actor."..playerid..".attri")
+	end
+	db:exec()
+	]]
+end
+
+function fightscene.save_player(playerid)
+	db:multi()
+	for k,v in pairs(player.attri) do
+		db:hset("actor."..playerid..".attri",k, v)
+	end
+	db:exec()
 end
 
 skynet.start(function()
@@ -118,6 +131,12 @@ skynet.start(function()
 	end)
 	fightscene.init()
 	skynet.fork(fightscene.fight)
+	local conf = {
+		host = "127.0.0.1" ,
+		port = 6379 ,
+		db = 0
+	}
+	db = redis.connect(conf)
 	skynet.register "fightscene"
 end)
 

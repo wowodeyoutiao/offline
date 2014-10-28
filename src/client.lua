@@ -5,6 +5,7 @@ local socket = require "clientsocket"
 local bit32 = require "bit32"
 local proto = require "proto"
 local sproto = require "sproto"
+local damageflow = require "damageflow"
 
 local sessionpool = {}
 
@@ -57,7 +58,7 @@ local function send_request(name, args, func)
 		session = session + 1
 		sessionpool[session] = func
 		local str = request(name, args, session)
-		send_package(fd, str)	
+		send_package(fd, str)
 end
 
 local last = ""
@@ -96,21 +97,63 @@ local function dispatch_package()
 		if not v then
 			break
 		end
-
 		print_package(host:dispatch(v))
 	end
 end
-send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)
-	print(args.ok)
+function call()
+	-- body
+end
+send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)print(args.ok)end)
+socket.usleep(1000)
+send_request("login", { username = "anmeng", password = "iloveyou" })
+socket.usleep(1000)
+send_request("createplayer", { username = "anmeng", job = 1, id = 1 }, function (args)
+	if args.ok ~= true then print "create actor fail" end
 end)
---send_request("login", { username = "anmeng", password = "iloveyou" })
---send_request("createplayer", { username = "anmeng", job = 1, id = 1 })
+socket.usleep(1000)
+local player = nil
+local mon = nil
+local df = nil
+function getplayerinfo()
+	send_request("getplayerinfo", { id = 1 }, function (args)
+		if args.ok then 
+			player = {}
+			for k,v in pairs(args.player) do
+				player[k] = v
+			end
+		end
+	end)		
+end
+
+
+
+function getfightround()
+	send_request("getplayerinfo", { id = 1 }, function (args)
+		mon = args.monster
+		df = args.damageflow
+	end)	
+end
+getplayerinfo()
+getfightround() 
 while true do
 	dispatch_package()
-	local cmd = socket.readstdin()
-	if cmd then
-		send_request("get", { what = cmd })
-	else
-		socket.usleep(100)
+	if player and mon then
+		local actor = {}
+		actor[player.id] = player
+		actor[mon.id] = mon
+		for i,v in ipairs(df) do
+			print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用".. 
+		damageflow.get_damage_name(v.type).."造成"..v.damage..damageflow.get_damage_type(v.type))
+		end
+		print("休息："..tostring(player.fightrate * 1000)
+		socket.usleep(player.fightrate * 1000)
+		player = nil
+		mon = nil
+		df = nil
+		getplayerinfo()
+		getfightround() 
+	end
+
+	
 	end
 end

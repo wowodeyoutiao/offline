@@ -11,19 +11,33 @@ local CMD = {}
 local REQUEST = {}
 local client_fd
 
-function REQUEST:get()
+function db_call(cmd, ...)
+	return skynet.call('db', lua, cmd, ...)
+end
+
+function REQUEST:getplayerinfo()
 	print("get", self.what)
 	local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
 	return { result = r }
 end
 
-function REQUEST:set()
+function REQUEST:getfightround()
 	print("set", self.what, self.value)
 	local r = skynet.call("SIMPLEDB", "lua", "set", self.what, self.value)
 end
 
-function REQUEST:handshake()
-	return { msg = "Welcome to skynet, I will send heartbeat every 5 sec." }
+function REQUEST.createplayer(id, name, job)
+	local actor = "actor."..name
+	local ok = db_call("exists", actor)
+	if not ok then		
+		local actorid = db_call("incr", "actor.count")
+		db_call("set", actor, actorid)
+		db_call("sadd", "account."..id..".actors", actorid)
+		local ok = skynet.call("fightscene", "lua", "new_actor", actorid, name, job)
+		if ok then return actorid end
+		return -1
+	end
+	return -1
 end
 
 local function request(name, args, response)
@@ -65,18 +79,6 @@ skynet.register_protocol {
 		end
 	end
 }
-
-function CMD.create_actor(id, name)
-	local actor = "actor."..name
-	local ok = db_call("exists", actor)
-	if not ok then		
-		local actorid = db_call("incr", "actor.count")
-		db_call("set", actor, actorid)
-		db_call("sadd", "account."..id..".actors", actorid)
-		return actorid
-	end
-	return -1
-end
 
 function CMD.start(gate, fd, proto)
 	host = sproto.new(proto.c2s):host "package"

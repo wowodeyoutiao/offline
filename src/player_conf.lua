@@ -29,6 +29,8 @@ local player_conf = {
 	physicaldamage = 80
 	}
 }
-player_conf[1] = player_conf.default_male_warrior
-player_conf[2] = player_conf.default_female_warrior
+player_conf[player_conf.default_male_warrior.job] = player_conf.default_male_warrior
+player_conf[player_conf.default_female_warrior.job] = player_conf.default_female_warrior
+player_conf[player_conf.default_male_magician.job] = player_conf.default_male_magician
+player_conf[player_conf.default_female_magician.job] = player_conf.default_female_magician
 return player_conf

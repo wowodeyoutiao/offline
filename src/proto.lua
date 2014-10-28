@@ -37,10 +37,11 @@ proto.c2s = sprotoparser.parse [[
 }
 
 .tmonster {
-	name 0: string
-	level 1 : integer
-	hp 2: integer
-	mp 3: integer
+	id 0: integer
+	name 1: string
+	level 2: integer
+	hp 3: integer
+	mp 4: integer
 }
 
 login 1 {
@@ -65,10 +66,10 @@ createaccount 2 {
 }
 
 createplayer 3 {
-	request {
+	request {		
+		id  0: integer
 		username 0: string
 		job 1: integer
-		id  2: integer
 	}
 	response {
 		ok 0: boolean
