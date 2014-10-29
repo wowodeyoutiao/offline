@@ -4,7 +4,7 @@ local fight_scene_conf = {
 		fight_rate = 10,
 		name = "初章",
 		boss = {
-			boss1 = {
+			{
 				name = 'super boss',
 				level = 2,
 				monster = "default_monster1",

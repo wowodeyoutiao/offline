@@ -9,8 +9,8 @@ skynet.start(function()
 	
 	--pcall(skynet.newservice, "testfight")
 	--skynet.newservice "dbpool" --启动db 
-	skynet.newservice "account_server"
-	skynet.newservice "fightscene"
+	skynet.newservice "account_server"	
+	skynet.kill(skynet.newservice "gen_fightscene")
 	local watchdog = skynet.newservice("watchdog")
 	skynet.call(watchdog, "lua", "start", {
 		port = 8888,

@@ -1,53 +1,25 @@
 local skynet = require "skynet"
 
 local fightround = require "fightround"
-local fightscene_conf = require "fightscene_conf"
 local monster = require "monster"
 local player = require "player"
 local game_utils = require "game_utils"
 local actor = require "actor"
-local  damageflow = require "damageflow"
+local damageflow = require "damageflow"
+
+local fightsceneid = ...
+local fightscene_conf, ordinary_monster, boss_monster
+
 
 local  CMD = {}
 
 local fightscene = {}
-local ordinary_monster = {}
-local boss_monster = {}
-local actorlist ={}
 
-function gen_monster(monster_conf, list)
-	for k,v in pairs(monster_conf) do
-		local mon = monster.new(v.monster)
-		if not mon then return end
-		mon.name = v.name
-		if v.init then
-			mon.attri.level = v.level
-			if mon then mon:set_default_attri(v.init) end
-		end		
-		list[k] = mon
-	end
-end
-
-function fightscene.init()
-	for k,v in ipairs(fightscene_conf) do
-		fightscene[k] = {
-		round_monster_count = v["round_monster_count"],
-		fight_rate = v["fight_rate"]
-		}
-		ordinary_monster[k] = {}
-		gen_monster(v.scene, ordinary_monster[k])
-		boss_monster[k] = {}
-		gen_monster(v["boss"], boss_monster[k])
-	end
-end
-
-function fightscene.find_monster(sceneid)
-	local curr_scene = fightscene[sceneid]
+function fightscene.find_monster()
 	local ret = {}
-	for i=1,curr_scene.round_monster_count do
-		local curr_monsterlist = ordinary_monster[i]
-		local max = #curr_monsterlist
-		local mon = curr_monsterlist[max]
+	for i=1,fightscene_conf.round_monster_count do
+		local max = #ordinary_monster
+		local mon = ordinary_monster[max]
 		mon = mon:clone()
 		table.insert(ret, mon)
 	end
@@ -137,6 +109,15 @@ function CMD.load_player(playerid)
 	]]
 end
 
+function CMD.start(...)
+	fightscene_conf, ordinary_monster, boss_monster = ...
+	for i,v in ipairs(ordinary_monster) do
+		for k,v1 in pairs(v) do
+			print(k, v1)
+		end
+	end
+end
+
 function fightscene.save_player(playerid)
 	--[[
 	db:multi()
@@ -160,9 +141,8 @@ skynet.start(function()
 			error(string.format("Unknown command %s", tostring(cmd)))
 		end
 	end)
-	fightscene.init()
 	skynet.fork(assert(fightscene.fight))
-	skynet.register "fightscene"
+	skynet.register("fightscene"..tostring(fightsceneid))
 end)
 
 
