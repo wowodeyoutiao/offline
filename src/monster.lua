@@ -22,9 +22,10 @@ function monster.new(id)
 end
 
 function monster:set_default_attri(id)
-	if not self.attri.level then return end
-	game_utils.copy_attri(self.attri, monster_conf[id], true)
-	--self.attri.hp = self.attri.hp * self.attri.level
+	if id == 1 then
+		if not self.attri.level then return end
+		self.attri.hp = self.attri.hp * self.attri.level
+	end
 end
 
 function monster:get_drop()

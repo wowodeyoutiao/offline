@@ -7,14 +7,15 @@ local fight_scene_conf = {
 			boss1 = {
 				name = 'super boss',
 				level = 2,
-				default = "default_monster1"
+				monster = "default_monster1"
+				init = 1
 			}
 		},
 		scene = {
 			{
 				name = "monster100",
 				level = 10,
-				default = "default_monster1"
+				monster = "monster1"
 			}
 		}
 	}

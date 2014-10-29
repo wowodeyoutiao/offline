@@ -19,16 +19,14 @@ local actorlist ={}
 
 function gen_monster(monster_conf, list)
 	for k,v in pairs(monster_conf) do
-		local mon 
-		if v.default then
-			mon = monster.new()
+		local mon = monster.new(v.monster)
+		if not mon then return end
+		mon.name = v.name
+		if v.init then
 			mon.attri.level = v.level
-			if mon then mon:set_default_attri(v.default) end
-		else
-			mon = monster.new(v)
-		end
-		if mon then mon.name = v.name end
-		if mon then list[k] = mon end
+			if mon then mon:set_default_attri(v.init) end
+		end		
+		list[k] = mon
 	end
 end
 

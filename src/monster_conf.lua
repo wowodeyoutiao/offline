@@ -1,7 +1,7 @@
 local monster_conf = {
 	default_monster1 = {
-		hp = 100,
-		mp = 100,
+		hp = 2000,
+		mp = 2000,
 		physicaldamage = 100,
 		drop = "loot1"
 	},
