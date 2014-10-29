@@ -25,7 +25,7 @@ local actor = {
 }
 
 actor.__index = actor
-local actorid = 1
+actorid = 1
 function actor.new()
     local t = {}
     t.level = 0

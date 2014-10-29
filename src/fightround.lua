@@ -7,9 +7,6 @@ local tempplayer = {}
 function fightround.fight(player ,monsters)
 	if not player then return end
 	tempplayer = player:clone()
-	for a, b in pairs(tempplayer) do
-		print("tempplayer",a, v)		
-	end
 	local df = {}
 	while true do
 		for i,v in ipairs(monsters) do
