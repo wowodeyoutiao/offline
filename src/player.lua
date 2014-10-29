@@ -9,13 +9,14 @@ player.__index = player
 setmetatable(player, actor)
 
 function player.new(id)
+	if not (id and player_conf[id]) then return end
 	local t = actor.new()
 	t.spellmagicorder = {}
 	t.currentspellmagicorder = 1
 	t.maxspellmaigccount = 1
 	t.bag = {}--包裹
-	setmetatable(t, player)
-	if id and player_conf[id] then game_utils.copy_attri(t.attri, player_conf[id]) end
+	game_utils.copy_attri(t.attri, player_conf[id]) 
+	setmetatable(t, player)	
 	return t
 end
 

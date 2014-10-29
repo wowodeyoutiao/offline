@@ -5,7 +5,6 @@ local fightround = require "fightround"
 local fightscene_conf = require "fightscene_conf"
 local monster = require "monster"
 local player = require "player"
-local player_conf = require "player_conf"
 local game_utils = require "game_utils"
 local actor = require "actor"
 
@@ -46,9 +45,6 @@ end
 function fightscene.find_monster(sceneid)
 	local curr_scene = fightscene[sceneid]
 	local ret = {}
-	for k,v in pairs(curr_scene) do
-		print(k,v)
-	end
 	for i=1,curr_scene.round_monster_count do
 		local curr_monsterlist = ordinary_monster[i]
 		local max = #curr_monsterlist
@@ -66,10 +62,8 @@ function fightscene.fight()
 		for i,scene in ipairs(fightscene) do -- in every scene
 			local fight_rate = scene.fight_rate
 			for _,player in ipairs(scene) do-- find every player
-				print(player.name, fight_rate, now, player.lastfight)
 				if now - player.lastfight >= fight_rate then
 					local mons = assert(fightscene.find_monster(i))
-					print(player.name, mons)
 					if #mons > 0 then
 						fightround.fight(player, mons)
 						player.lastfight = now
@@ -101,8 +95,9 @@ function CMD.changescene(player, id)
 end
 
 function CMD.new_player(playerid, name, job)
-	if job and player_conf[job] then
-		local newplayer = player.new(player_conf[job])
+	if job then
+		local newplayer = player.new(job)
+		if not newplayer then return end
 		newplayer.id = playerid
 		fightscene.startscene(newplayer, 1)
 		return true
