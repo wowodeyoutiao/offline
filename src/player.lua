@@ -8,15 +8,30 @@ player.__index = player
 
 setmetatable(player, actor)
 
-function player.new(id)
-	if not (id and player_conf[id]) then return end
+function player.new(id)	
 	local t = actor.new()
 	t.spellmagicorder = {}
 	t.currentspellmagicorder = 1
 	t.maxspellmaigccount = 1
 	t.bag = {}--包裹
-	game_utils.copy_attri(t.attri, player_conf[id]) 
+	if  id and player_conf[id] then game_utils.copy_attri(t.attri, player_conf[id])  end	
 	setmetatable(t, player)	
+	return t
+end
+
+function player:clone( )
+	local t = player.new()
+	t.currentspellmagicorder = self.currentspellmagicorder
+	t.maxspellmaigccount = self.maxspellmaigccount
+	for k,v in pairs(self.bag) do
+		t.bag[k] = v
+	end
+	for k,v in pairs(self.spellmagicorder) do
+		t.spellmagicorder[k] = v
+	end
+	t.id = self.id
+	t.name = self.name
+	game_utils.copy_attri(t.attri, self.attri) 
 	return t
 end
 

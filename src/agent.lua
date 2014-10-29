@@ -71,7 +71,6 @@ skynet.register_protocol {
 	end,
 	dispatch = function (_, _, type, ...)
 		if type == "REQUEST" then
-			print("agent: ",...)
 			local ok, result  = pcall(request, ...)
 			if ok then
 				if result then

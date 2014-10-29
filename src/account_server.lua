@@ -46,7 +46,6 @@ function account_server.start(g, proto)
 end
 
 function account_server.open(fd)
-	print ( "client: "..fd)
 	skynet.call(gate, "lua", "forward", fd, fd)
 end
 
@@ -72,7 +71,6 @@ function REQUEST:login()
 end
 
 local function request(name, args, response)
-	print("request", name)
 	local f = assert(REQUEST[name])
 	local r = f(args)
 	if response then
@@ -121,6 +119,7 @@ skynet.start(function()
 		local f = assert(account_server[cmd])
 		if f then f(...) end 
 	end)
+	--[[
 	db = redis.connect({
 		host = "127.0.0.1" ,
 		port = 6379 ,
@@ -136,5 +135,6 @@ skynet.start(function()
 		db:set( "actor.count", "0")
 	end
 	print("start account server ok")
+	]]
 	skynet.register "account_server"
 end)

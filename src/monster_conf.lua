@@ -6,11 +6,11 @@ local monster_conf = {
 		drop = "loot1"
 	},
 	monster1 = {
-	level = 10,
-	hp = 1000,
-	mp = 889,
-	physicaldamage = 80,
-	drop = "loot2"
+		level = 10,
+		hp = 1000,
+		mp = 889,
+		physicaldamage = 80,
+		drop = "loot2"
 }
 }
 return monster_conf

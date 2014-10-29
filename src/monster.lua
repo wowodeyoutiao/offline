@@ -12,12 +12,19 @@ setmetatable(monster, actor)
 function monster.new(id)
 	local t  =  actor.new()
 	setmetatable(t, monster)
-	if id then 
-		local mon = monster_conf[id]
-		if not mon then return nil end
-		game_utils.copy_attri(t.attri, mon) 
-		t.drop = mon.drop
+	if id and monster_conf[id] then 
+		game_utils.copy_attri(t.attri, monster_conf[id]) 
+		t.drop = monster_conf[id].drop
 	end
+	return t
+end
+
+function monster:clone( )
+	local t = monster.new()
+	t.drop = self.drop
+	t.id = self.id
+	t.name = self.name
+	game_utils.copy_attri(t.attri, self.attri) 
 	return t
 end
 

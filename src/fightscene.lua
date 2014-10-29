@@ -1,5 +1,4 @@
 local skynet = require "skynet"
-local redis = require "redis"
 
 local fightround = require "fightround"
 local fightscene_conf = require "fightscene_conf"
@@ -7,13 +6,13 @@ local monster = require "monster"
 local player = require "player"
 local game_utils = require "game_utils"
 local actor = require "actor"
+local  damageflow = require "damageflow"
 
 local  CMD = {}
 
 local fightscene = {}
 local ordinary_monster = {}
 local boss_monster = {}
-local db
 local actorlist ={}
 
 function gen_monster(monster_conf, list)
@@ -57,21 +56,38 @@ end
 
 function fightscene.fight()
 	while true do
-		skynet.sleep(100)
+		skynet.sleep(500)
+		print("fight")
 		local now = skynet.now()
 		for i,scene in ipairs(fightscene) do -- in every scene
 			local fight_rate = scene.fight_rate
+			print("fight2222", fight_rate)
 			for _,player in ipairs(scene) do-- find every player
+				print("fight22221", now, player.lastfight)
 				if now - player.lastfight >= fight_rate then
+					print("fight1")
 					local mons = assert(fightscene.find_monster(i))
+					print("fight2")
 					if #mons > 0 then
-						fightround.fight(player, mons)
+						local df = {}
+						local actors = {}
+						actors[player.id] = player:clone()
+						for i,v in ipairs(mons) do
+							actors[v.id] = v:clone()
+						end
+						fightround.fight(player, mons, df)			
+						local tempplayer = player:clone() 
+						for i,v in pairs(df) do 
+							print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
+								.."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
+							actors[v.dest].attri.hp = actors[v.dest].attri.hp - v.damage 
+						end
 						player.lastfight = now
 					end
 				end
 			end
 		end
-		--]]
+		
 	end
 end
 
@@ -98,7 +114,7 @@ function CMD.new_player(playerid, name, job)
 	if job then
 		local newplayer = player.new(job)
 		if not newplayer then return end
-		newplayer.id = playerid
+		--newplayer.id = playerid
 		fightscene.startscene(newplayer, 1)
 		return true
 	end
@@ -122,11 +138,13 @@ function CMD.load_player(playerid)
 end
 
 function fightscene.save_player(playerid)
+	--[[
 	db:multi()
 	for k,v in pairs(player.attri) do
 		db:hset("actor."..playerid..".attri",k, v)
 	end
 	db:exec()
+	]]
 end
 
 function fightscene.getfightround(playerid)
@@ -135,7 +153,6 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
-		print(...)
 		local f = CMD[string.lower(cmd)]
 		if f then
 			skynet.ret(skynet.pack(f(...)))
@@ -145,12 +162,6 @@ skynet.start(function()
 	end)
 	fightscene.init()
 	skynet.fork(assert(fightscene.fight))
-	local conf = {
-		host = "127.0.0.1" ,
-		port = 6379 ,
-		db = 0
-	}
-	db = redis.connect(conf)
 	skynet.register "fightscene"
 end)
 
