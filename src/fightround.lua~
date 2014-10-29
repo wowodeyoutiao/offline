@@ -27,7 +27,7 @@ function fightround.fight(player ,monsters)
 	end
 local actors = {[monsters[1].id] = monsters[1], [player.id] = player}
 for i,v in pairs(df) do
-	print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type).."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
+	print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用")..damageflow.get_damage_name(v.type).."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
 end
 end
 

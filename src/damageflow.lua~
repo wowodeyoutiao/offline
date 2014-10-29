@@ -29,7 +29,7 @@ end
 
 function damageflow.get_damage_name(id)
 	if (id > 0) and (id < #damagetype) then
-		return damagetype[id].id
+		return damagetype[id].name
 	end
 end
 return damageflow
