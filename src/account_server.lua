@@ -52,7 +52,7 @@ end
 
 function REQUEST:createaccount()
 	print("createaccount", self.username, self.password)
-	local r = new_account(self.username, self.password)
+	local r = true--new_account(self.username, self.password)
 	if not r then
 		return {ok = false}
 	else
@@ -62,7 +62,7 @@ end
 
 function REQUEST:login()
 	print("login", self.username, self.password)
-	local r = auth(self.username, self.password)
+	local r = 1--auth(self.username, self.password)
 	if not r then
 		return {ok = false}
 	else

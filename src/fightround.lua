@@ -22,10 +22,18 @@ function fightround.fight(player ,monsters)
 		end
 		if not templayer:isalive() then break end		
 	end
-local actors = {[monsters[1].id] = monsters[1], [player.id] = player}
-for i,v in pairs(df) do
-	print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type).."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
-end
+	local actors = {}
+	for i,v in ipairs(monsters) do
+		actors[v.id] = v
+	end
+	actors[player.id] = player
+	tempplayer = player:clone()
+	for i,v in pairs(df) do
+		print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
+			.."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
+		print("player.hp = ",tempplayer.attri.hp)
+		if v.dest == tempplayer.id then tempplayer.attri.hp = tempplayer.attri.hp - v.damage end
+	end
 end
 
 return fightround
