@@ -5,22 +5,19 @@ local player = require "player"
 local game_utils = require "game_utils"
 local actor = require "actor"
 local damageflow = require "damageflow"
+local fightscene_conf = require "fightscene_conf"
 
 local fightsceneid = ...
-local fightscene_conf, ordinary_monster, boss_monster
-
-
 local  CMD = {}
-
 local fightscene = {}
-
-local playerlist = {}
+local actorlist 
+local ordinary_monster = {}
+local boss_monster = {}
 
 function fightscene.find_monster()
-	local ret = {}
-	for i=1,fightscene_conf.round_monster_count do
-		local mon = ordinary_monster[1]
-		mon = mon:clone()
+	local ret = {} 
+	for i=1,fightscene.round_monster_count do
+		local  mon = ordinary_monster[i] :clone()
 		table.insert(ret, mon)
 	end
 	return ret
@@ -29,15 +26,13 @@ end
 function fightscene.fight()
 	while true do
 		skynet.sleep(500)
-		print("fight")
+		print("fight", #actorlist)
 		local now = skynet.now()
-		local fight_rate = fightscene_conf.fight_rate
-		for _,player in ipairs(playerlist) do-- find every player
-			print("fight22221", now, player.lastfight)
+		local fight_rate = fightscene.fight_rate
+		for _,player in ipairs(actorlist) do-- find every player
 			if now - player.lastfight >= fight_rate then
-				print("fight1")
-				local mons = assert(fightscene.find_monster(i))
-				print("fight2")
+
+				local mons = fightscene.find_monster()
 				if #mons > 0 then
 					local df = {}
 					local actors = {}
@@ -45,12 +40,13 @@ function fightscene.fight()
 					for i,v in ipairs(mons) do
 						actors[v.id] = v:clone()
 					end
-					ffightscene.fightround(player, mons, df)			
+					fightscene.fightround(player, mons, df)		
 					local tempplayer = player:clone() 
 					for i,v in pairs(df) do 
 						print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
 							.."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
 						actors[v.dest].attri.hp = actors[v.dest].attri.hp - v.damage 
+						print(actors[v.dest].attri.hp)
 					end
 					player.lastfight = now
 				end
@@ -84,18 +80,19 @@ end
 
 function CMD.new_player(name, job)
 	if job then
-		local newplayer = player.new(job) 
-		if not newplayer then return end 
-		newplayer.lastfight = 0 print(33)
-		playerlist[newplayer.id] = newplayer 
+		local player = player.new(job) 
+		if not player then return end 
+		player.lastfight = 0 
+		player.sceneid = #actorlist + 1
+		actorlist[player.sceneid ] = player
 		return true
 	end
 	return false
 end
 
 function CMD.get_player(playerid)
-	assert(playerlist[playerid])
-	return playerlist[playerid]
+	assert(actorlist[playerid])
+	return actorlist[playerid]
 end
 
 function CMD.load_player(playerid)
@@ -107,10 +104,6 @@ function CMD.load_player(playerid)
 	end
 	db:exec()
 	]]
-end
-
-function CMD.start(...)
-	fightscene_conf, ordinary_monster, boss_monster = ...
 end
 
 function fightscene.save_player(playerid)
@@ -127,9 +120,34 @@ function fightscene.getfightround(playerid)
 	return {monster = {}, damageflow = {}}
 end
 
+function gen_monster(monster_conf, list)
+	for k,v in pairs(monster_conf) do
+		local mon = monster.new(v.monster)
+		if not mon then return end
+		mon.name = v.name
+		if v.init then
+			mon.attri.level = v.level
+			if mon then mon:set_default_attri(v.init) end
+		end		
+		list[k] = mon
+	end
+end
+
+function init(id)
+	local v = fightscene_conf[id]
+	if not v then return end
+	fightscene.round_monster_count = v.round_monster_count
+	fightscene.fight_rate = v.fight_rate
+	fightscene.name = v.name		
+	ordinary_monster = {}
+	boss_monster = {}
+	gen_monster(v.scene, ordinary_monster)	
+	gen_monster(v.boss, boss_monster)
+	return true
+end
+
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
-		print(cmd,...)
 		local f = CMD[string.lower(cmd)]
 		if f then
 			skynet.ret(skynet.pack(f(...)))
@@ -137,8 +155,10 @@ skynet.start(function()
 			error(string.format("Unknown command %s", tostring(cmd)))
 		end
 	end)
+	if not init(tonumber(fightsceneid)) then print("fightscene init fail") end
+	actorlist = {}
 	skynet.fork(assert(fightscene.fight))
-	skynet.register("fightscene"..tostring(fightsceneid))
+	skynet.register("fightscene"..fightsceneid)
 end)
 
 

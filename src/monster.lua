@@ -23,7 +23,7 @@ function monster:clone( )
 	local t = monster.new()
 	t.drop = self.drop
 	t.id = self.id
-	t.name = self.name
+	t.name = self.name 
 	game_utils.copy_attri(t.attri, self.attri) 
 	return t
 end

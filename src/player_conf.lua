@@ -5,6 +5,8 @@ local player_conf = {
 		job = 1,
 		hp = 2000,
 		mp = 100,
+		criticaldamage = 300,
+		criticalrate = 200,
 		physicaldamage = 100
 	},
 	default_female_warrior = {
