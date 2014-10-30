@@ -19,12 +19,26 @@ end
 function REQUEST:getplayerinfo()
 	print("getplayerinfo", self.id)
 	local r = skynet.call("fightscene1", "lua", "get_player", self.id)
-	return { ok = true ,player = r }
+		for k,v in pairs(r) do
+		print(k,v)
+		if type(v) == "table" then
+		for a,b in pairs(v) do
+			print(a, b)
+		end
+		end
+	end
+	return { ok = true ,player = r.attri }
 end
 
 function REQUEST:getfightround()
 	print("getfightround", self.id)
 	local r = skynet.call("fightscene1", "lua", "getfightround", self.id)
+	for k,v in pairs(r) do
+		print(k,v)
+		for a,b in pairs(v) do
+			print(a, b)
+		end
+	end
 	return {monster = r.monster, damageflow = r.damageflow}
 end
 
@@ -32,9 +46,8 @@ function REQUEST.createplayer(self)
 	local id = self.id
 	local name = self.username
 	local job = self.job
-	local actorid = 1
 	local ok = skynet.call("fightscene1", "lua", "new_player", name, job)
-	if ok then return {id = actorid} end
+	if ok then return {id = 1} end
 	return {id = -1}
 end
 

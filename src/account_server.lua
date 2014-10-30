@@ -52,21 +52,21 @@ end
 function REQUEST:createaccount()
 	print("createaccount", self.username, self.password)
 	local r = true--new_account(self.username, self.password)
-	if not r then
-		return {ok = false}
-	else
+	if r then
 		return {ok = true}
+	else
+		return {ok = false}
 	end
 end
 
 function REQUEST:login()
 	print("login", self.username, self.password)
 	local r = 1--auth(self.username, self.password)
-	if not r then
-		return {ok = false}
+	if r then
+		return { ok = true, id = r}
 	else
 		
-		return { ok = true, id = r}
+		return { ok = false}
 	end
 end
 
@@ -85,25 +85,21 @@ local function send_package(fd, pack)
 		pack
 	socket.write(fd, package)
 end
-function proc_login(fd, name)
-	if name == "login" then 
-		skynet.call("watchdog", "lua", "startagent", fd)	
-	end
-end
+
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
 	unpack = function (msg, sz)
 		return host:dispatch(msg, sz)
 	end,
-	dispatch = function (session, source, type, ...)
+	dispatch = function (session, source, type, name, args, response)
 		if type == "REQUEST" then
-			local ok, result  = pcall(request, ...)
-			if ok then
-				proc_login(source, ...)
-				if result then
-					send_package(source, result)
-				end
+			local result  = request(name, args, response)
+			if name == "login" then
+				skynet.call("watchdog", "lua", "startagent", source)	
+			end
+			if result then
+				send_package(source, result)
 			else
 				skynet.error(result)
 			end

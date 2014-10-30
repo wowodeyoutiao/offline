@@ -44,7 +44,17 @@ proto.c2s = sprotoparser.parse [[
 	mp 4: integer
 }
 
-login 1 {
+createaccount 1 {
+	request {
+		username 0 : string
+		password 1 : string
+	}
+	response {
+		ok 0 : boolean
+	}
+}
+
+login 2 {
 	request {
 		username 0 : string
 		password 1 : string
@@ -52,16 +62,6 @@ login 1 {
 	response {
 		ok 0 : boolean
 		id 1 : integer
-	}
-}
-
-createaccount 2 {
-	request {
-		username 0 : string
-		password 1 : string
-	}
-	response {
-		ok 0 : boolean
 	}
 }
 

@@ -23,9 +23,22 @@ local function send_package(fd, pack)
 	socket.send(fd, package)
 end
 
+local function unpack_package(text)
+	local size = #text
+	if size < 2 then
+		return nil, text
+	end
+	local s = text:byte(1) * 256 + text:byte(2)
+	if size < s+2 then
+		return nil, text
+	end
+
+	return text:sub(3,2+s), text:sub(3+s)
+end
+
 local function recv_package(last)
 	local result
-	
+	result, last = unpack_package(last)
 	if result then
 		return result, last
 	end
@@ -60,7 +73,6 @@ local function print_request(name, args)
 end
 
 local function print_response(session1, args)
-	print("rsession"..session1)
 	if (sessionpool[session1]) then
 		sessionpool[session1](args)
 		sessionpool[session1] = nil
@@ -79,29 +91,50 @@ end
 
 local function dispatch_package()
 	while true do
-		local size = socket.recv(fd)
-		if size ~= 0 then break end
-	end
-	while true do
 		local v
 		v, last = recv_package(last)
 		if not v then
 			break
 		end
+
 		print_package(host:dispatch(v))
 	end
 end
-function call()
-	-- body
+local wait1 = 0
+function wait()
+	while wait1 == 0 do
+		socket.usleep(100)
+		dispatch_package()
+	end
+	wait1 = 0
 end
-send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)print(args.ok)end)
-socket.usleep(1000)
-send_request("login", { username = "anmeng", password = "iloveyou" })
-socket.usleep(5000)
-send_request("createplayer", { username = "anmeng", job = 1, id = 1 }, function (args)
-	if args.ok ~= true then print "create actor fail" end
+
+function notwait()
+	wait1 = 1
+end
+
+send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)
+	for k,v in pairs(args) do
+		print(k,v)
+	end
+	notwait()
 end)
-socket.usleep(1000)
+wait()
+send_request("login", { username = "anmeng", password = "iloveyou" }, function(args)
+	for k,v in pairs(args) do
+		print(k,v)
+	end
+	notwait()
+end)
+wait()
+send_request("createplayer", { username = "anmeng", job = 1, id = 1 }, function (args)
+	for k,v in pairs(args) do
+		print(k,v)
+	end
+	if args.id > 0 then print "create actor succeed" end
+	notwait()
+end)
+wait()
 local player = nil
 local mon = nil
 local df = nil
@@ -111,8 +144,10 @@ function getplayerinfo()
 			player = {}
 			for k,v in pairs(args.player) do
 				player[k] = v
+				print(k, player[k])
 			end
 		end
+		notwait()
 	end)		
 end
 
@@ -122,10 +157,13 @@ function getfightround()
 	send_request("getfightround", { id = 1 }, function (args)
 		mon = args.monster
 		df = args.damageflow
+		notwait()
 	end)	
 end
---getplayerinfo()
---getfightround() 
+getplayerinfo()
+--wait()
+--getfightround()
+--wait()
 while true do
 	dispatch_package()
 	if player and mon then
