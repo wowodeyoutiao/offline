@@ -1,6 +1,5 @@
 local skynet = require "skynet"
 
-local fightround = require "fightround"
 local monster = require "monster"
 local player = require "player"
 local game_utils = require "game_utils"
@@ -20,8 +19,7 @@ local playerlist = {}
 function fightscene.find_monster()
 	local ret = {}
 	for i=1,fightscene_conf.round_monster_count do
-		local max = #ordinary_monster
-		local mon = ordinary_monster[max]
+		local mon = ordinary_monster[1]
 		mon = mon:clone()
 		table.insert(ret, mon)
 	end
@@ -34,7 +32,6 @@ function fightscene.fight()
 		print("fight")
 		local now = skynet.now()
 		local fight_rate = fightscene_conf.fight_rate
-		print("fight_rate", fight_rate)
 		for _,player in ipairs(playerlist) do-- find every player
 			print("fight22221", now, player.lastfight)
 			if now - player.lastfight >= fight_rate then
@@ -48,7 +45,7 @@ function fightscene.fight()
 					for i,v in ipairs(mons) do
 						actors[v.id] = v:clone()
 					end
-					fightround.fight(player, mons, df)			
+					ffightscene.fightround(player, mons, df)			
 					local tempplayer = player:clone() 
 					for i,v in pairs(df) do 
 						print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
@@ -59,6 +56,26 @@ function fightscene.fight()
 				end
 			end
 		end
+	end
+end
+
+function fightscene.fightround(player ,monsters, df)
+	local tempplayer = {}
+	if not player then return end
+	tempplayer = player:clone()
+	while true do
+		for i,v in ipairs(monsters) do
+			tempplayer:fight(v, df)
+		end
+		local alive = true
+		for i,v in ipairs(monsters) do
+			alive = alive and v:isalive()
+		end
+		if not alive then break end
+		for i,v in ipairs(monsters) do
+			v:fight(tempplayer, df)			
+		end
+		if not tempplayer:isalive() then break end	
 	end
 end
 
