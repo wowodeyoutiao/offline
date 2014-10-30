@@ -15,6 +15,8 @@ local  CMD = {}
 
 local fightscene = {}
 
+local playerlist = {}
+
 function fightscene.find_monster()
 	local ret = {}
 	for i=1,fightscene_conf.round_monster_count do
@@ -31,71 +33,52 @@ function fightscene.fight()
 		skynet.sleep(500)
 		print("fight")
 		local now = skynet.now()
-		for i,scene in ipairs(fightscene) do -- in every scene
-			local fight_rate = scene.fight_rate
-			print("fight2222", fight_rate)
-			for _,player in ipairs(scene) do-- find every player
-				print("fight22221", now, player.lastfight)
-				if now - player.lastfight >= fight_rate then
-					print("fight1")
-					local mons = assert(fightscene.find_monster(i))
-					print("fight2")
-					if #mons > 0 then
-						local df = {}
-						local actors = {}
-						actors[player.id] = player:clone()
-						for i,v in ipairs(mons) do
-							actors[v.id] = v:clone()
-						end
-						fightround.fight(player, mons, df)			
-						local tempplayer = player:clone() 
-						for i,v in pairs(df) do 
-							print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
-								.."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
-							actors[v.dest].attri.hp = actors[v.dest].attri.hp - v.damage 
-						end
-						player.lastfight = now
+		local fight_rate = fightscene_conf.fight_rate
+		print("fight_rate", fight_rate)
+		for _,player in ipairs(playerlist) do-- find every player
+			print("fight22221", now, player.lastfight)
+			if now - player.lastfight >= fight_rate then
+				print("fight1")
+				local mons = assert(fightscene.find_monster(i))
+				print("fight2")
+				if #mons > 0 then
+					local df = {}
+					local actors = {}
+					actors[player.id] = player:clone()
+					for i,v in ipairs(mons) do
+						actors[v.id] = v:clone()
 					end
+					fightround.fight(player, mons, df)			
+					local tempplayer = player:clone() 
+					for i,v in pairs(df) do 
+						print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
+							.."造成"..tostring(v.damage)..damageflow.get_damage_type(v.type))
+						actors[v.dest].attri.hp = actors[v.dest].attri.hp - v.damage 
+					end
+					player.lastfight = now
 				end
 			end
 		end
-		
 	end
 end
 
-function fightscene.startscene(player, id)
-	if not fightscene[id] then return false end
-	fightscene[id][player.id] = player
-	player.sceneid = id
-	player.lastfight = 0
-	actorlist[player.id] = player 
-	return true
+function CMD.changescene(playerid, sceneid)
 end
 
-function CMD.changescene(player, id)
-	local curr_scene = fightscene[player.sceneid]
-	if curr_scene[player.id] == player then
-		curr_scene[player.id] = nil
-		curr_scene = player
-		return true
-	end
-	return false
-end
-
-function CMD.new_player(playerid, name, job)
+function CMD.new_player(name, job)
 	if job then
-		local newplayer = player.new(job)
-		if not newplayer then return end
-		--newplayer.id = playerid
-		fightscene.startscene(newplayer, 1)
+		local newplayer = player.new(job) 
+		if not newplayer then return end 
+		newplayer.lastfight = 0 print(33)
+		playerlist[newplayer.id] = newplayer 
 		return true
 	end
 	return false
 end
 
 function CMD.get_player(playerid)
-	assert(actorlist[playerid])
-	return actorlist[playerid]
+	assert(playerlist[playerid])
+	return playerlist[playerid]
 end
 
 function CMD.load_player(playerid)
@@ -111,11 +94,6 @@ end
 
 function CMD.start(...)
 	fightscene_conf, ordinary_monster, boss_monster = ...
-	for i,v in ipairs(ordinary_monster) do
-		for k,v1 in pairs(v) do
-			print(k, v1)
-		end
-	end
 end
 
 function fightscene.save_player(playerid)
@@ -134,6 +112,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
+		print(cmd,...)
 		local f = CMD[string.lower(cmd)]
 		if f then
 			skynet.ret(skynet.pack(f(...)))

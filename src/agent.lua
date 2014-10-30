@@ -18,13 +18,13 @@ end
 
 function REQUEST:getplayerinfo()
 	print("getplayerinfo", self.id)
-	local r = skynet.call("fightscene", "lua", "get_player", self.id)
+	local r = skynet.call("fightscene1", "lua", "get_player", self.id)
 	return { ok = true ,player = r }
 end
 
 function REQUEST:getfightround()
 	print("getfightround", self.id)
-	local r = skynet.call("fightscene", "lua", "getfightround", self.id)
+	local r = skynet.call("fightscene1", "lua", "getfightround", self.id)
 	return {monster = r.monster, damageflow = r.damageflow}
 end
 
@@ -32,17 +32,9 @@ function REQUEST.createplayer(self)
 	local id = self.id
 	local name = self.username
 	local job = self.job
-	local actor = "actor."..name
-	local ok = db_call("exists", actor)
-	if not ok then		
-		local actorid = db_call("incr", "actor.count")
-		db_call("set", actor, actorid)
-		db_call("sadd", "account."..id..".actors", actorid)
-		actorid = 1
-		local ok = skynet.call("fightscene", "lua", "new_player", actorid, name, job)
-		if ok then return {id = actorid} end
-		return {id = -1}
-	end
+	local actorid = 1
+	local ok = skynet.call("fightscene1", "lua", "new_player", name, job)
+	if ok then return {id = actorid} end
 	return {id = -1}
 end
 
@@ -88,9 +80,9 @@ skynet.register_protocol {
 
 function CMD.start(gate, fd, proto)
 	host = sproto.new(proto.c2s):host "package"
-	send_request = host:attach(sproto.new(proto.s2c))
-	client_fd = fd
-	skynet.call(gate, "lua", "forward", fd)
+	send_request = host:attach(sproto.new(proto.s2c)) 
+	client_fd = fd 
+	skynet.call(gate, "lua", "forward", fd) 
 end
 
 skynet.start(function()
