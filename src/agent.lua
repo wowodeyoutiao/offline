@@ -10,45 +10,54 @@ local send_request
 local CMD = {}
 local REQUEST = {}
 local client_fd
+local playerid =  -1
+local sceneid = -1
 
-function db_call(cmd, ...)
-	return false
-	--return skynet.call("db", lua, cmd, ...)
+function db_call(...)
+	return skynet.call("db", "lua", playerid, ...)
 end
 
 function REQUEST:getplayerinfo()
-	print("getplayerinfo", self.id)
-	local r = skynet.call("fightscene1", "lua", "get_player", self.id)
-		for k,v in pairs(r) do
-		print(k,v)
-		if type(v) == "table" then
-		for a,b in pairs(v) do
-			print(a, b)
-		end
-		end
-	end
+	print("getplayerinfo")
+	local r = skynet.call("fightscene"..sceneid, "lua", "get_player", playerid)
 	return { ok = true ,player = r.attri }
 end
 
 function REQUEST:getfightround()
-	print("getfightround", self.id)
-	local r = skynet.call("fightscene1", "lua", "getfightround", self.id)
-	for k,v in pairs(r) do
-		print(k,v)
-		for a,b in pairs(v) do
-			print(a, b)
-		end
-	end
+	print("getfightround")
+	local r = skynet.call("fightscene"..sceneid, "lua", "getfightround", playerid)
 	return {monster = r.monster, damageflow = r.damageflow}
 end
 
-function REQUEST.createplayer(self)
-	local id = self.id
+function REQUEST:createplayer()
 	local name = self.username
 	local job = self.job
-	local ok = skynet.call("fightscene1", "lua", "new_player", name, job)
-	if ok then return {id = 1} end
+	local l = db_call("exists", "player."..playerid)
+	if l then return {id = -2} end
+	local r = skynet.call("fightscene1", "lua", "new_player", name, job, playerid)
+	if r then 
+		db_call("set", "player."..playerid, playerid)
+		db_call("set", "player."..playerid..".sceneid", 1)
+		return {id = r} 
+	end
 	return {id = -1}
+end
+
+function REQUEST:loadplayer()
+	local ok = db_call("exists", "player."..playerid)
+	if ok then	
+		sceneid	= db_call("get", "player."..playerid..".sceneid")
+		local r = skynet.call("fightscene"..sceneid, "lua", "load_player", playerid)
+		if ok then return {id = playerid} end
+	end
+	return {id = -1}
+end
+
+function REQUEST:changescene()
+	if sceneid ~= -1 then
+		skynet.call("fightscene"..sceneid, "lua", "delete_player", playerid)
+		skynet.call("fightscene"..self.id, "lua", "load_player", playerid)
+	end
 end
 
 local function request(name, args, response)
@@ -91,10 +100,11 @@ skynet.register_protocol {
 	end
 }
 
-function CMD.start(gate, fd, proto)
+function CMD.start(gate, d, proto)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c)) 
-	client_fd = fd 
+	client_fd = d.fd
+	playerid = d.id
 	skynet.call(gate, "lua", "forward", fd) 
 end
 

@@ -29,7 +29,7 @@ function fightscene.fight()
 		print("fight", #actorlist)
 		local now = skynet.now()
 		local fight_rate = fightscene.fight_rate
-		for _,player in ipairs(actorlist) do-- find every player
+		for _,player in pairs(actorlist) do-- find every player
 			if now - player.lastfight >= fight_rate then
 
 				local mons = fightscene.find_monster()
@@ -75,45 +75,61 @@ function fightscene.fightround(player ,monsters, df)
 	end
 end
 
-function CMD.changescene(playerid, sceneid)
-end
-
-function CMD.new_player(name, job)
+function CMD.new_player(name, job, id)
 	if job then
 		local player = player.new(job) 
 		if not player then return end 
-		player.lastfight = 0 
-		player.sceneid = #actorlist + 1
-		actorlist[player.sceneid ] = player
+		player.lastfight = 0
+		player.id = id
+		player.sceneid = fightsceneid
+		actorlist[tostring(player.id)] = player
+		return true
+	end
+	return false
+end
+
+function CMD.delete_player(playerid)
+	local  id = tostring(playerid)
+	if actorlist[id] then
+		fightscene.save_player(playerid)
+		actorlist[id] = nil
 		return true
 	end
 	return false
 end
 
 function CMD.get_player(playerid)
-	assert(actorlist[playerid])
-	return actorlist[playerid]
+	local  id = tostring(playerid)
+	assert(actorlist[id])
+	return actorlist[id]
+end
+
+function db_call(...)
+	return skynet.call("db", "lua", playerid, ...)
 end
 
 function CMD.load_player(playerid)
-	--[[
-	local player = {}
-	db:multi()
-	for k,v in pairs(player.attri) do
-		db:gset("actor."..playerid..".attri")
+	local player = player.new(1)
+	skynet.call("db", "lua", playerid, "multi")
+	for k,_ in pairs(player.attri) do
+		local v = skynet.call("db", "lua", playerid,"get", "player."..playerid..".attri."..k)
+		player.attri[k] = v
 	end
-	db:exec()
-	]]
+	player.name = skynet.call("db", "lua", playerid, "get", "player."..playerid..".name")
+	player.sceneid = fightsceneid
+	player.id = playerid
+	actorlist[tostring(player.id)] = player
+	skynet.call("db", "lua", playerid, "exec")
 end
 
 function fightscene.save_player(playerid)
-	--[[
-	db:multi()
-	for k,v in pairs(player.attri) do
-		db:hset("actor."..playerid..".attri",k, v)
+	skynet.call("db", "lua", playerid, "multi")
+	for k,vin pairs(player.attri) do
+		skynet.call("db", "lua", playerid,"set", "player."..playerid..".attri."..k, v)
 	end
-	db:exec()
-	]]
+	skynet.call("db", "lua", playerid, "set", "player."..playerid..".name", player.name)
+	skynet.call("db", "lua", playerid,"set", "player."..playerid..".sceneid", fightsceneid)
+	skynet.call("db", "lua", playerid, "exec")
 end
 
 function fightscene.getfightround(playerid)

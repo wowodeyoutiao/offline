@@ -25,7 +25,6 @@ local actor = {
 }
 
 actor.__index = actor
-actorid = 1
 function actor.new()
     local t = {}
     t.level = 0
@@ -47,9 +46,7 @@ function actor.new()
     t.equipments = {}--装备
     t.death = false
     t = {attri = t}
-    t.name = "anmeng"
-    t.id = actorid
-    actorid = actorid + 1
+    t.name = ""
     math.randomseed(os.time())
     return setmetatable(t, actor)
 end

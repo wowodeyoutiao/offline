@@ -44,7 +44,7 @@ proto.c2s = sprotoparser.parse [[
 	mp 4: integer
 }
 
-createaccount 1 {
+login 1 {
 	request {
 		username 0 : string
 		password 1 : string
@@ -54,22 +54,20 @@ createaccount 1 {
 	}
 }
 
-login 2 {
+createaccount 2 {
 	request {
 		username 0 : string
 		password 1 : string
 	}
 	response {
 		ok 0 : boolean
-		id 1 : integer
 	}
 }
 
 createplayer 3 {
 	request {		
-		id  0: integer
-		username 1: string
-		job 2: integer
+		username 0: string
+		job 1: integer
 	}
 	response {
 		id 0: integer
@@ -78,7 +76,6 @@ createplayer 3 {
 
 getplayerinfo 4 {
 	request {
-		id 0: integer
 	}
 	response {
 		ok 0: boolean
@@ -88,8 +85,7 @@ getplayerinfo 4 {
 
 changescene  5 {
 	request {
-		id 0: integer
-		sceneid 1: integer
+		sceneid 0: integer
 	}
 	response {
 		ok 0: boolean
@@ -115,5 +111,9 @@ proto.s2c = sprotoparser.parse [[
 }
 
 ]]
+
+local f = io.open("proto.txt", "w")
+f:write(proto.c2s)
+f:close()
 
 return proto

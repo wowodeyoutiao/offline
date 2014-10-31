@@ -112,34 +112,40 @@ end
 function notwait()
 	wait1 = 1
 end
+function createaccount()
+	send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)
+		for k,v in pairs(args) do
+			print(k,v)
+		end
+		notwait()
+	end)
+	wait()
+end
 
-send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)
-	for k,v in pairs(args) do
-		print(k,v)
-	end
-	notwait()
-end)
-wait()
-send_request("login", { username = "anmeng", password = "iloveyou" }, function(args)
-	for k,v in pairs(args) do
-		print(k,v)
-	end
-	notwait()
-end)
-wait()
-send_request("createplayer", { username = "anmeng", job = 1, id = 1 }, function (args)
-	for k,v in pairs(args) do
-		print(k,v)
-	end
-	if args.id > 0 then print "create actor succeed" end
-	notwait()
-end)
-wait()
-local player = nil
-local mon = nil
-local df = nil
+function login()
+	send_request("login", { username = "anmeng", password = "iloveyou" }, function(args)
+		for k,v in pairs(args) do
+			print(k,v)
+		end
+		notwait()
+		if not args.ok then createaccount() end 
+	end)
+	wait()
+end
+
+function createplayer()
+send_request("createplayer", { username = "anmeng", job = 1}, function (args)
+		for k,v in pairs(args) do
+			print(k,v)
+		end
+		if args.id > 0 then print "create actor succeed" end
+		notwait()
+	end)
+	wait()
+end
+
 function getplayerinfo()
-	send_request("getplayerinfo", { id = 1 }, function (args)
+	send_request("getplayerinfo", {}, function (args)
 		if args.ok then 
 			player = {}
 			for k,v in pairs(args.player) do
@@ -147,23 +153,30 @@ function getplayerinfo()
 				print(k, player[k])
 			end
 		end
+		else
+			createplayer()
+		end
 		notwait()
-	end)		
+	end)	
+	wait()	
 end
 
-
-
 function getfightround()
-	send_request("getfightround", { id = 1 }, function (args)
+	send_request("getfightround", {}, function (args)
 		mon = args.monster
 		df = args.damageflow
 		notwait()
 	end)	
+	wait()
 end
+
+local player = nil
+local mon = nil
+local df = nil
+login()
 getplayerinfo()
---wait()
+
 --getfightround()
---wait()
 while true do
 	dispatch_package()
 	if player and mon then

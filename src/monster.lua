@@ -5,12 +5,14 @@ local monster_conf = require "monster_conf"
 local game_utils = require "game_utils"
 local logger = require "logger"
 
-local monster =  {}
+local monster =  {monstercount = 0}
 monster.__index = monster
 setmetatable(monster, actor)
 
 function monster.new(id)
 	local t  =  actor.new()
+	monster.monstercount = monster.monstercount + 1
+	t.id = - monster.monstercount 
 	setmetatable(t, monster)
 	if id and monster_conf[id] then 
 		game_utils.copy_attri(t.attri, monster_conf[id]) 

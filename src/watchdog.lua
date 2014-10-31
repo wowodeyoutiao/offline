@@ -39,9 +39,9 @@ function CMD.start(conf)
 	skynet.call("account_server", "lua", "start", gate, proto)
 end
 
-function  CMD.startagent(fd)
+function  CMD.startagent(fd, d)
 	agent[fd] = skynet.newservice("agent")
-	skynet.call(agent[fd], "lua", "start", gate, fd, proto)
+	skynet.call(agent[fd], "lua", "start", gate, d, proto)
 end
 
 skynet.start(function()

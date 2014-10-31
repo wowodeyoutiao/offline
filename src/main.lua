@@ -8,7 +8,7 @@ skynet.start(function()
 	skynet.newservice("debug_console",8000)
 	
 	--pcall(skynet.newservice, "testfight")
-	--skynet.newservice "dbpool" --启动db 
+	skynet.newservice "dbpool" --启动db 
 	skynet.newservice "account_server"	
 	skynet.kill(skynet.newservice "gen_fightscene")
 	local watchdog = skynet.newservice("watchdog")

@@ -18,7 +18,7 @@ local function auth(username, password)
 	local name = "account."..username
 	local id = db_call("get", name)
 	if id then
-		local pw = db_call("get",name..id..".password")
+		local pw = db_call("get",name.."."..id..".password")
 		if password == pw then return id end
 	end
 	return false
@@ -51,7 +51,7 @@ end
 
 function REQUEST:createaccount()
 	print("createaccount", self.username, self.password)
-	local r = true--new_account(self.username, self.password)
+	local r = new_account(self.username, self.password)
 	if r then
 		return {ok = true}
 	else
@@ -61,7 +61,7 @@ end
 
 function REQUEST:login()
 	print("login", self.username, self.password)
-	local r = 1--auth(self.username, self.password)
+	local r = auth(self.username, self.password)
 	if r then
 		return { ok = true, id = r}
 	else
@@ -95,8 +95,8 @@ skynet.register_protocol {
 	dispatch = function (session, source, type, name, args, response)
 		if type == "REQUEST" then
 			local result  = request(name, args, response)
-			if name == "login" then
-				skynet.call("watchdog", "lua", "startagent", source)	
+			if name == "login" and result.ok  then
+				skynet.call("watchdog", "lua", "startagent", {fd = source, id = result.id)	
 			end
 			if result then
 				send_package(source, result)
@@ -115,7 +115,6 @@ skynet.start(function()
 		local f = assert(account_server[cmd])
 		if f then f(...) end 
 	end)
-	--[[
 	db = redis.connect({
 		host = "127.0.0.1" ,
 		port = 6379 ,
@@ -126,11 +125,6 @@ skynet.start(function()
 	if not ok then 
 		db:set( "account.count", "0")
 	end
-	ok = db:exists("actor.count")
-	if not ok then 
-		db:set( "actor.count", "0")
-	end
 	print("start account server ok")
-	]]
 	skynet.register "account_server"
 end)
