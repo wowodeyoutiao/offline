@@ -15,9 +15,9 @@ function db_call(cmd, ...)
 end
 
 local function auth(username, password)
-	local name = "account."..username
-	local id = db_call("get", name)
-	if id then
+	local name = "account."..username   
+	local id = db_call("get", name) 
+	if id then 
 		local pw = db_call("get",name.."."..id..".password")
 		if password == pw then return id end
 	end
@@ -63,15 +63,19 @@ function REQUEST:login()
 	print("login", self.username, self.password)
 	local r = auth(self.username, self.password)
 	if r then
+		print(self.fd, r)
+		skynet.call("watchdog", "lua", "startagent", {fd = self.fd, id = r})	
+		print("login ok ")
 		return { ok = true, id = r}
 	else
-		
+		print("login fail ")
 		return { ok = false}
 	end
 end
 
-local function request(name, args, response)
+local function request(name, args, response, session)
 	local f = assert(REQUEST[name])
+	args.fd = session
 	local r = f(args)
 	if response then
 		return response(r)
@@ -94,10 +98,7 @@ skynet.register_protocol {
 	end,
 	dispatch = function (session, source, type, name, args, response)
 		if type == "REQUEST" then
-			local result  = request(name, args, response)
-			if name == "login" and result.ok  then
-				skynet.call("watchdog", "lua", "startagent", {fd = source, id = result.id)	
-			end
+			local result  = request(name, args, response, source)
 			if result then
 				send_package(source, result)
 			else

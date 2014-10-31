@@ -124,7 +124,7 @@ end
 
 function fightscene.save_player(playerid)
 	skynet.call("db", "lua", playerid, "multi")
-	for k,vin pairs(player.attri) do
+	for k,v in pairs(player.attri) do
 		skynet.call("db", "lua", playerid,"set", "player."..playerid..".attri."..k, v)
 	end
 	skynet.call("db", "lua", playerid, "set", "player."..playerid..".name", player.name)

@@ -118,6 +118,7 @@ function createaccount()
 			print(k,v)
 		end
 		notwait()
+		login()
 	end)
 	wait()
 end
@@ -152,7 +153,6 @@ function getplayerinfo()
 				player[k] = v
 				print(k, player[k])
 			end
-		end
 		else
 			createplayer()
 		end
@@ -163,6 +163,15 @@ end
 
 function getfightround()
 	send_request("getfightround", {}, function (args)
+		mon = args.monster
+		df = args.damageflow
+		notwait()
+	end)	
+	wait()
+end
+
+function  loadplayer( )
+	send_request("", {}, function (args)
 		mon = args.monster
 		df = args.damageflow
 		notwait()

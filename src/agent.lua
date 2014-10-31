@@ -9,6 +9,7 @@ local send_request
 
 local CMD = {}
 local REQUEST = {}
+local agent = {}
 local client_fd
 local playerid =  -1
 local sceneid = -1
@@ -18,7 +19,7 @@ function db_call(...)
 end
 
 function REQUEST:getplayerinfo()
-	print("getplayerinfo")
+	print("getplayerinfo", sceneid)
 	local r = skynet.call("fightscene"..sceneid, "lua", "get_player", playerid)
 	return { ok = true ,player = r.attri }
 end
@@ -39,16 +40,6 @@ function REQUEST:createplayer()
 		db_call("set", "player."..playerid, playerid)
 		db_call("set", "player."..playerid..".sceneid", 1)
 		return {id = r} 
-	end
-	return {id = -1}
-end
-
-function REQUEST:loadplayer()
-	local ok = db_call("exists", "player."..playerid)
-	if ok then	
-		sceneid	= db_call("get", "player."..playerid..".sceneid")
-		local r = skynet.call("fightscene"..sceneid, "lua", "load_player", playerid)
-		if ok then return {id = playerid} end
 	end
 	return {id = -1}
 end
@@ -100,12 +91,24 @@ skynet.register_protocol {
 	end
 }
 
+function agent.loadplayer()
+	local ok = db_call("exists", "player."..playerid)
+	if ok then	
+		sceneid	= db_call("get", "player."..playerid..".sceneid")
+		local r = skynet.call("fightscene"..sceneid, "lua", "load_player", playerid)
+		if ok then return {id = playerid} end
+	end
+	print("loadplayer fail"..tostring(playerid))
+	return {id = -1}
+end
+
 function CMD.start(gate, d, proto)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c)) 
 	client_fd = d.fd
-	playerid = d.id
-	skynet.call(gate, "lua", "forward", fd) 
+	playerid =  d.id
+	skynet.call(gate, "lua", "forward", d.fd) 
+	agent.loadplayer()
 end
 
 skynet.start(function()
