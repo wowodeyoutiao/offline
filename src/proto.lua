@@ -79,7 +79,7 @@ getplayerinfo 4 {
 	}
 	response {
 		ok 0: boolean
-		player 1: tplayer
+		player 1: *tplayer
 	}
 } 
 

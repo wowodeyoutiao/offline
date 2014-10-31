@@ -44,7 +44,6 @@ function actor.new()
     t.buff = {}
     t.magics = {}--技能
     t.equipments = {}--装备
-    t.death = false
     t = {attri = t}
     t.name = ""
     math.randomseed(os.time())

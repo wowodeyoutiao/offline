@@ -148,11 +148,7 @@ end
 function getplayerinfo()
 	send_request("getplayerinfo", {}, function (args)
 		if args.ok then 
-			player = {}
-			for k,v in pairs(args.player) do
-				player[k] = v
-				print(k, player[k])
-			end
+			print("getplayerinfo ok")
 		else
 			createplayer()
 		end
@@ -163,15 +159,6 @@ end
 
 function getfightround()
 	send_request("getfightround", {}, function (args)
-		mon = args.monster
-		df = args.damageflow
-		notwait()
-	end)	
-	wait()
-end
-
-function  loadplayer( )
-	send_request("", {}, function (args)
 		mon = args.monster
 		df = args.damageflow
 		notwait()

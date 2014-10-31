@@ -19,9 +19,13 @@ function db_call(...)
 end
 
 function REQUEST:getplayerinfo()
-	print("getplayerinfo", sceneid)
+	if sceneid == -1 then return {ok = false} end	
 	local r = skynet.call("fightscene"..sceneid, "lua", "get_player", playerid)
+	if r then
 	return { ok = true ,player = r.attri }
+	else
+	return { ok = false}	
+	end
 end
 
 function REQUEST:getfightround()
@@ -39,7 +43,7 @@ function REQUEST:createplayer()
 	if r then 
 		db_call("set", "player."..playerid, playerid)
 		db_call("set", "player."..playerid..".sceneid", 1)
-		return {id = r} 
+		return {id = playerid} 
 	end
 	return {id = -1}
 end

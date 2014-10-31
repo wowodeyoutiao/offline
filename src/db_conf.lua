@@ -7,17 +7,17 @@ local db_conf = {
 	{
 		host = "127.0.0.1" ,
 		port = 6379 ,
-		db = 1
+		db = 0
 	},
 	{
 		host = "127.0.0.1" ,
 		port = 6379 ,
-		db = 2
+		db = 0
 	},
 	{
 		host = "127.0.0.1" ,
 		port = 6379 ,
-		db = 4
+		db = 0
 	}
 }
 return db_conf

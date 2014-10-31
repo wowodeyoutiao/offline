@@ -28,6 +28,7 @@ skynet.start(function()
 	end
 	skynet.register "db"
 	skynet.dispatch("lua", function(session, source, ...)
+		print(...)
 		local d = dbpool[current % dbpoolcount + 1]
 		current = current + 1		
 		skynet.retpack(d.command(...))
