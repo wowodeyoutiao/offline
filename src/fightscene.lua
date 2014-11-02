@@ -14,14 +14,6 @@ local actorlist = {}
 local ordinary_monster = {}
 local boss_monster = {}
 
-function set_player(id, player)
-	actorlist[id] = player
-end
-
-function get_player(playerid)
-	return actorlist[playerid]
-end
-
 function fightscene.find_monster()
 	local ret = {} 
 	for i=1,fightscene.round_monster_count do
@@ -33,7 +25,7 @@ end
 
 function fightscene.fight()
 	while true do
-		skynet.sleep(300)
+		skynet.sleep(1)
 		print("fight", #actorlist)
 		local now = skynet.now()
 		local fight_rate = fightscene.fight_rate
@@ -47,7 +39,7 @@ function fightscene.fight()
 					for i,v in ipairs(mons) do
 						actors[v.id] = v:clone()
 					end
-					fightscene.fightround(player, mons, df)		
+					fightscene.fightround(player, mons, df)	
 					local tempplayer = player:clone() 
 					for i,v in pairs(df) do 
 						print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..damageflow.get_damage_name(v.type)
@@ -84,56 +76,75 @@ end
 
 function CMD.new_player(name, job, id)
 	if job then
-		local player = player.new(job) 
-		if not player then return end 
-		player.lastfight = 0
-		player.id = id
-		player.sceneid = fightsceneid
-		set_player(id, player)
-		fightscene.save_player(player.id)
+		local p = player.new(job) 
+		if not p then return end 
+		p.name = name
+		p.lastfight = 0
+		p.id = id
+		p.sceneid = fightsceneid
+		actorlist[id] = p
+		fightscene.save_player(p.id)
+		skynet.call("db", "lua", 1,"lpush", "scene."..fightsceneid, id)
 		return true
 	end
 	return false
 end
 
 function CMD.delete_player(playerid)
-	if get_player(player) then
+	if actorlist[playerid] then
 		fightscene.save_player(playerid)
-		set_player(playerid, nil)
+		actorlist[playerid] = nil
 		return true
 	end
 	return false
 end
 
 function CMD.get_player(playerid)
-	assert(get_player(playerid))
-	return get_player(playerid)
+	print("get_player",playerid)
+	assert(actorlist[playerid])
+	return actorlist[playerid]
 end
 
 function db_call(...)
 	return skynet.call("db", "lua", ...)
 end
 
-function CMD.load_player(playerid)
-	local player = player.new(1)
-	--skynet.call("db", "lua", playerid, "multi")
-	for k,_ in pairs(player.attri) do
-		local v = skynet.call("db", "lua", playerid,"get", "player."..playerid..".attri."..k)
-		player.attri[k] = v
+function print_r(t)
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			for a,b in pairs(v) do
+				print(a, b)
+			end
+		else
+			print(k,v)
+		end
 	end
-	player.name = skynet.call("db", "lua", playerid, "get", "player."..playerid..".name")
-	player.sceneid = fightsceneid
-	player.id = playerid
-	player.lastfight = 0
-	set_player(playerid, player)
+end
+
+function CMD.load_player(playerid)
+	local t = player.new()
+	--skynet.call("db", "lua", playerid, "multi")
+	for k,v in pairs(t.attri) do
+		if type(v) ~= "table" then
+			local a = skynet.call("db", "lua", playerid,"get", "player."..playerid..".attri."..k)
+			t.attri[k] = tonumber(a)
+		else
+		end
+	end
+	t.name = skynet.call("db", "lua", playerid, "get", "player."..playerid..".name")
+	print_r(t)
+	t.sceneid = fightsceneid
+	t.id = playerid
+	t.lastfight = 0
+	actorlist[playerid] = t
 	--skynet.call("db", "lua", playerid, "exec")
 end
 
 function fightscene.save_player(playerid)
 	print("save_player", playerid)
 	--skynet.call("db", "lua", playerid, "MULTI")
-	local player = actorlist[playerid]
-	for k,v in pairs(player.attri) do
+	local p = actorlist[playerid]
+	for k,v in pairs(p.attri) do
 		if type(v) == "table" then
 			for m, n in pairs(v) do
 				skynet.call("db", "lua", playerid,"set", "player."..playerid..".attri."..k.."."..m, n)
@@ -142,13 +153,21 @@ function fightscene.save_player(playerid)
 			skynet.call("db", "lua", playerid,"set", "player."..playerid..".attri."..k, v)
 		end
 	end
-	skynet.call("db", "lua", playerid, "set", "player."..playerid..".name", player.name)
-	skynet.call("db", "lua", playerid,"set", "player."..playerid..".sceneid", fightsceneid)
+	skynet.call("db", "lua", playerid, "set", "player."..playerid..".name", p.name)
+	skynet.call("db", "lua", playerid, "set", "player."..playerid..".sceneid", fightsceneid)
 	--skynet.call("db", "lua", playerid, "exec")
 end
 
 function fightscene.getfightround(playerid)
 	return {monster = {}, damageflow = {}}
+end
+
+function fightscene.loadthissceneplayer()
+	--local r = skynet.call("db", "lua", 1,"lrange", "scene."..fightsceneid, 0, -1)
+	print("nice")
+	--for k,v in pairs(r) do
+	--	print("vvbb",k,v)
+	--end
 end
 
 function gen_monster(monster_conf, list)
@@ -179,7 +198,6 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
-		print("fs cmd :",cmd)
 		local f = CMD[string.lower(cmd)]
 		if f then
 			skynet.ret(skynet.pack(f(...)))
@@ -188,6 +206,7 @@ skynet.start(function()
 		end
 	end)
 	if not init(tonumber(fightsceneid)) then print("fightscene init fail") end
+	fightscene.loadthissceneplayer()
 	skynet.fork(assert(fightscene.fight))
 	skynet.register("fightscene"..fightsceneid)
 end)
