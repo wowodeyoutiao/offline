@@ -99,11 +99,16 @@ function agent.loadplayer()
 	local ok = db_call("exists", "player."..playerid)
 	if ok then	
 		sceneid	= db_call("get", "player."..playerid..".sceneid")
-		local r = skynet.call("fightscene"..sceneid, "lua", "load_player", playerid)
+		local r = skynet.call("fightscene"..sceneid, "lua", "online", playerid)
 		if ok then return {id = playerid} end
 	end
 	print("loadplayer fail"..tostring(playerid))
 	return {id = -1}
+end
+
+function agent.offline()
+	local r = skynet.call("fightscene"..sceneid, "lua", "offline", playerid)
+	print("offline :"..tostring(playerid))
 end
 
 function CMD.start(gate, d, proto)
@@ -113,6 +118,10 @@ function CMD.start(gate, d, proto)
 	playerid =  d.id
 	skynet.call(gate, "lua", "forward", d.fd) 
 	agent.loadplayer()
+end
+
+function CMD.exit()
+	agent.offline()
 end
 
 skynet.start(function()

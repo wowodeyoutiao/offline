@@ -171,8 +171,7 @@ local mon = nil
 local df = nil
 login()
 getplayerinfo()
-
---getfightround()
+getfightround()
 while true do
 	dispatch_package()
 	if player and mon then
