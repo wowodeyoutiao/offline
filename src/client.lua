@@ -118,9 +118,6 @@ function notwait()
 end
 function createaccount()
 	send_request("createaccount", { username = "anmeng", password = "iloveyou" }, function(args)
-		for k,v in pairs(args) do
-			print(k,v)
-		end
 		notwait()
 		login()
 	end)
@@ -129,9 +126,6 @@ end
 
 function login()
 	send_request("login", { username = "anmeng", password = "iloveyou" }, function(args)
-		for k,v in pairs(args) do
-			print(k,v)
-		end
 		notwait()
 		if not args.ok then createaccount() end 
 	end)
@@ -140,9 +134,6 @@ end
 
 function createplayer()
 send_request("createplayer", { username = "anmeng", job = 1}, function (args)
-		for k,v in pairs(args) do
-			print(k,v)
-		end
 		if args.id > 0 then print "create actor succeed" end
 		notwait()
 	end)
@@ -151,14 +142,15 @@ end
 
 function getplayerinfo()
 	send_request("getplayerinfo", {}, function (args)
-		for k,v in pairs(args) do
-			print(999,k,v)
-		end
 		if args.ok then 
-			print("getplayerinfo ok", args.player)
+			print("getplayerinfo ok")
 			player = args.player
+			for k,v in pairs(player) do
+				print(k,v)
+			end
 		else
 			createplayer()
+			getplayerinfo()
 		end
 		notwait()
 	end)	
@@ -169,12 +161,6 @@ function getfightround()
 	send_request("getfightround", {}, function (args)
 		mon = args.monster
 		df = args.damageflow
-		print("getfightround", mon, df)
-		for i,v in ipairs(mon) do
-			for k,v in pairs(v) do
-				print(777,k,v)
-			end
-		end
 		notwait()
 	end)	
 	wait()
@@ -182,6 +168,7 @@ end
 
 login()
 getplayerinfo()
+socket.usleep(1000 * 1000 * 5)
 getfightround()
 while true do
 	dispatch_package()
@@ -193,11 +180,16 @@ while true do
 		end
 		
 		for i,v in ipairs(df) do
-			print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..
+			print(actors[v.src].name.."(hp: "..tostring(actors[v.src].hp)..")".." 对 "..
+				actors[v.dest].name.."(hp: "..tostring(actors[v.dest].hp)..")".."使用"..
 		damageflow.get_damage_name(v.type).."造成"..v.damage..damageflow.get_damage_type(v.type))
+			actors[v.dest].hp = actors[v.dest].hp - v.damage
+			if actors[v.dest].hp <= 0 then 
+				print(actors[v.dest].name,"死亡")
+			end
 		end
-		print("休息："..tostring(player.fightrate * 1000))
-		socket.usleep(player.fightrate * 1000)
+		print("休息:"..tostring(player.fightrate).."秒")
+		socket.usleep(player.fightrate * 1000 * 1000)
 		player = nil
 		mon = nil
 		df = nil

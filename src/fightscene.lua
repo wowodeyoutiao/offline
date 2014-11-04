@@ -17,7 +17,8 @@ local boss_monster = {}
 function fightscene.find_monster()
 	local ret = {} 
 	for i=1,fightscene.round_monster_count do
-		local  mon = ordinary_monster[i]:clone()
+		local index = math.random(1, #ordinary_monster)
+		local  mon = ordinary_monster[index]:clone()
 		table.insert(ret, mon)
 	end
 	return ret
@@ -40,22 +41,20 @@ end
 
 function fightscene.fight()
 	local fight_rate = fightscene.fight_rate * 100
-	print(fight_rate)
+	print("fightscene "..fightsceneid.." start")
 	while true do
-		skynet.sleep(1)
+		skynet.sleep(100)
 		local now = skynet.now()
 		for _, _player in pairs(actorlist) do-- find every player
 			if now - _player.lastfight >= fight_rate then
 				local mons = fightscene.find_monster()
 				if #mons > 0 then
 					local df = {}
-					print(88888)
-					_player.fightmonster = gen_clientmonster(mons)
-					fightscene.fightround(_player, mons, df)
-					--if _player.online then 
-						
-						_player.damageflow = df
-					--end
+					if _player.online then 
+						_player.fightmonster = gen_clientmonster(mons)
+					end
+					fightscene.fightround(_player, mons, df)	
+					_player.damageflow = df
 					_player.lastfight = now
 				end
 			end
@@ -69,21 +68,22 @@ function fightscene.fightround(player ,monsters, df)
 	tempplayer = player:clone()
 	while true do
 		for i,v in ipairs(monsters) do
-			tempplayer:fight(v, df)
+			if v:isalive() then
+				tempplayer:fight(v, df)
+			else
+				table.remove(monsters, i)
+			end
 		end
-		local alive = true
+		if #monsters == 0 then break end
 		for i,v in ipairs(monsters) do
-			alive = alive and v:isalive()
-		end
-		if not alive then break end
-		for i,v in ipairs(monsters) do
-			v:fight(tempplayer, df)			
+			if v:isalive() then
+				v:fight(tempplayer, df)	
+			end
 		end
 		if not tempplayer:isalive() then break end	
 	end
 end
 function CMD.online(playerid)
-	print "online"
 	assert(actorlist[playerid])
 	if actorlist[playerid] then
 		local p = actorlist[playerid]
@@ -107,6 +107,7 @@ function CMD.new_player(name, job, id)
 		p.lastfight = 0
 		p.id = id
 		p.sceneid = fightsceneid
+		p.online = true
 		actorlist[id] = p
 		fightscene.save_player(p.id)
 		skynet.call("db", "lua", 1,"lpush", "scene."..fightsceneid, id)
@@ -125,7 +126,6 @@ function CMD.delete_player(playerid)
 end
 
 function CMD.get_player(playerid)
-	print("get_player",playerid)
 	assert(actorlist[playerid])
 	return actorlist[playerid]
 end
@@ -211,6 +211,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
+		print(cmd)
 		local f = CMD[string.lower(cmd)]
 		if f then
 			skynet.ret(skynet.pack(f(...)))

@@ -21,7 +21,7 @@ function db_call(...)
 end
 
 function REQUEST:getplayerinfo()
-	if sceneid == -1 then return {ok = false} end	
+	if not fightsceneid then return {ok = false} end	
 	local r = skynet.call(fightsceneid, "lua", "get_player", playerid)
 	if r then
 		local c = {}
@@ -39,6 +39,7 @@ function REQUEST:getplayerinfo()
 end
 
 function REQUEST:getfightround()	
+	if not fightsceneid then return {} end
 	local r = skynet.call(fightsceneid, "lua", "getfightround", playerid)
 	return {monster = r.monster, damageflow = r.damageflow}
 end
@@ -48,7 +49,9 @@ function REQUEST:createplayer()
 	local job = self.job
 	local l = db_call("exists", "player."..playerid)
 	if l then return {id = -2} end
-	local r = skynet.call("fightscene1", "lua", "new_player", name, job, playerid)
+	fightsceneid = "fightscene1"
+	sceneid = 1
+	local r = skynet.call(fightsceneid, "lua", "new_player", name, job, playerid)
 	if r then 
 		db_call("set", "player."..playerid, playerid)
 		db_call("set", "player."..playerid..".sceneid", 1)
@@ -110,6 +113,7 @@ function agent.loadplayer()
 		sceneid	= db_call("get", "player."..playerid..".sceneid")
 		fightsceneid = "fightscene"..sceneid
 		sceneid = tonumber(sceneid)
+		print(fightsceneid)
 		local r = skynet.call(fightsceneid, "lua", "online", playerid)
 		if ok then return {id = playerid} end
 	end

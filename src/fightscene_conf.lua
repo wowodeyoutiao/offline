@@ -1,6 +1,6 @@
 local fight_scene_conf = {
 	[1] = {
-		round_monster_count = 1,
+		round_monster_count = 2,
 		fight_rate = 5,
 		name = "初章",
 		boss = {
@@ -13,10 +13,17 @@ local fight_scene_conf = {
 		},
 		scene = {
 			{
-				name = "monster100",
+				name = "小小怪",
 				level = 10,
-				monster = "monster1"
-			}
+				monster = "monster1",
+				init = 1
+			},
+			{
+				name = "小怪",
+				level = 20,
+				monster = "monster1",
+				init = 1
+			},
 		}
 	}
 }
