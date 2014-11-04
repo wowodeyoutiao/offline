@@ -24,7 +24,7 @@ function fightscene.find_monster()
 end
 
 function gen_clientmonster(mons)
-	loca r = {}
+	local r = {}
 	for i,v in ipairs(mons) do
 		local m = {}
 		m.id = v.id
@@ -34,11 +34,13 @@ function gen_clientmonster(mons)
 		m.mp = v.attri.mp
 		table.insert(r, m)
 	end
+	if #r == 0 then return nil end
 	return r
 end
 
 function fightscene.fight()
 	local fight_rate = fightscene.fight_rate * 100
+	print(fight_rate)
 	while true do
 		skynet.sleep(1)
 		local now = skynet.now()
@@ -47,11 +49,13 @@ function fightscene.fight()
 				local mons = fightscene.find_monster()
 				if #mons > 0 then
 					local df = {}
+					print(88888)
+					_player.fightmonster = gen_clientmonster(mons)
 					fightscene.fightround(_player, mons, df)
-					if _player.online then 
-						_player.fightmonster = gen_clientmonster(mons)
+					--if _player.online then 
+						
 						_player.damageflow = df
-					end
+					--end
 					_player.lastfight = now
 				end
 			end
@@ -79,9 +83,11 @@ function fightscene.fightround(player ,monsters, df)
 	end
 end
 function CMD.online(playerid)
+	print "online"
 	assert(actorlist[playerid])
 	if actorlist[playerid] then
 		local p = actorlist[playerid]
+		p.lastfight = 0
 		p.online = true
 	end
 end
@@ -167,7 +173,7 @@ end
 function CMD.getfightround(playerid)
 	assert(actorlist[playerid])
 	local p = actorlist[playerid]
-	return {monster = p.fightmonster, damageflow = p.damageflow}
+	return  {monster = p.fightmonster, damageflow = p.damageflow}
 end
 
 function fightscene.loadthissceneplayer()

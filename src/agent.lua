@@ -3,6 +3,7 @@ local netpack = require "netpack"
 local socket = require "socket"
 local sproto = require "sproto"
 local bit32 = require "bit32"
+local fightscene_conf = require "fightscene_conf"
 
 local host
 local send_request
@@ -13,6 +14,7 @@ local agent = {}
 local client_fd
 local playerid =  -1
 local sceneid = -1
+local fightsceneid 
 
 function db_call(...)
 	return skynet.call("db", "lua", playerid, ...)
@@ -20,17 +22,24 @@ end
 
 function REQUEST:getplayerinfo()
 	if sceneid == -1 then return {ok = false} end	
-	local r = skynet.call("fightscene"..sceneid, "lua", "get_player", playerid)
+	local r = skynet.call(fightsceneid, "lua", "get_player", playerid)
 	if r then
-	return { ok = true ,player = r.attri }
+		local c = {}
+		for k,v in pairs(r.attri) do
+			c[k] = v
+		end
+		c.name = r.name
+
+		c.id = playerid
+		c.fightrate = fightscene_conf[sceneid].fight_rate
+		return { ok = true ,player = c }
 	else
-	return { ok = false}	
+		return { ok = false, player = {}}	
 	end
 end
 
-function REQUEST:getfightround()
-	print("getfightround")
-	local r = skynet.call("fightscene"..sceneid, "lua", "getfightround", playerid)
+function REQUEST:getfightround()	
+	local r = skynet.call(fightsceneid, "lua", "getfightround", playerid)
 	return {monster = r.monster, damageflow = r.damageflow}
 end
 
@@ -50,8 +59,8 @@ end
 
 function REQUEST:changescene()
 	if sceneid ~= -1 then
-		skynet.call("fightscene"..sceneid, "lua", "delete_player", playerid)
-		skynet.call("fightscene"..self.id, "lua", "load_player", playerid)
+		skynet.call(fightsceneid, "lua", "delete_player", playerid)
+		skynet.call("fightscene"..tostring(self.id), "lua", "load_player", playerid)
 	end
 end
 
@@ -99,7 +108,9 @@ function agent.loadplayer()
 	local ok = db_call("exists", "player."..playerid)
 	if ok then	
 		sceneid	= db_call("get", "player."..playerid..".sceneid")
-		local r = skynet.call("fightscene"..sceneid, "lua", "online", playerid)
+		fightsceneid = "fightscene"..sceneid
+		sceneid = tonumber(sceneid)
+		local r = skynet.call(fightsceneid, "lua", "online", playerid)
 		if ok then return {id = playerid} end
 	end
 	print("loadplayer fail"..tostring(playerid))
@@ -107,7 +118,7 @@ function agent.loadplayer()
 end
 
 function agent.offline()
-	local r = skynet.call("fightscene"..sceneid, "lua", "offline", playerid)
+	local r = skynet.call(fightsceneid, "lua", "offline", playerid)
 	print("offline :"..tostring(playerid))
 end
 

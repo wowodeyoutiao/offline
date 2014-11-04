@@ -9,7 +9,7 @@ proto.c2s = sprotoparser.parse [[
 }
 
 .tplayer {
-	sceneid 0 : integer
+	id 0 : integer
 	name 1 : string
 	job 2 : integer
 	level 3 : integer
@@ -79,7 +79,7 @@ getplayerinfo 4 {
 	}
 	response {
 		ok 0: boolean
-		player 1: *tplayer
+		player 1: tplayer
 	}
 } 
 
@@ -97,7 +97,7 @@ getfightround  6 {
 		id 0: integer
 	}
 	response {
-		monster 0: tmonster
+		monster 0: *tmonster
 		damageflow 1: *tdamageflow
 	}
 }

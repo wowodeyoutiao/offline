@@ -7,6 +7,10 @@ local proto = require "proto"
 local sproto = require "sproto"
 local damageflow = require "damageflow"
 
+local player = nil
+local mon = nil
+local df = nil
+
 local sessionpool = {}
 
 local host = sproto.new(proto.s2c):host "package"
@@ -147,8 +151,12 @@ end
 
 function getplayerinfo()
 	send_request("getplayerinfo", {}, function (args)
+		for k,v in pairs(args) do
+			print(999,k,v)
+		end
 		if args.ok then 
-			print("getplayerinfo ok")
+			print("getplayerinfo ok", args.player)
+			player = args.player
 		else
 			createplayer()
 		end
@@ -161,25 +169,31 @@ function getfightround()
 	send_request("getfightround", {}, function (args)
 		mon = args.monster
 		df = args.damageflow
+		print("getfightround", mon, df)
+		for i,v in ipairs(mon) do
+			for k,v in pairs(v) do
+				print(777,k,v)
+			end
+		end
 		notwait()
 	end)	
 	wait()
 end
 
-local player = nil
-local mon = nil
-local df = nil
 login()
 getplayerinfo()
 getfightround()
 while true do
 	dispatch_package()
 	if player and mon then
-		local actor = {}
-		actor[player.id] = player
-		actor[mon.id] = mon
+		local actors= {}
+		actors[player.id] = player
+		for i,v in ipairs(mon) do
+			actors[v.id] = v
+		end
+		
 		for i,v in ipairs(df) do
-			print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用".. 
+			print(actors[v.src].name.." 对 "..actors[v.dest].name.."使用"..
 		damageflow.get_damage_name(v.type).."造成"..v.damage..damageflow.get_damage_type(v.type))
 		end
 		print("休息："..tostring(player.fightrate * 1000))
