@@ -111,9 +111,9 @@ proto.s2c = sprotoparser.parse [[
 }
 
 ]]
-
+--[[
 local f = io.open("proto.txt", "w")
 f:write(proto.c2s)
 f:close()
-
+]]
 return proto

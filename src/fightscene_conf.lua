@@ -1,7 +1,7 @@
 local fight_scene_conf = {
 	[1] = {
 		round_monster_count = 1,
-		fight_rate = 10,
+		fight_rate = 5,
 		name = "初章",
 		boss = {
 			{

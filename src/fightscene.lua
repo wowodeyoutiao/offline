@@ -23,18 +23,36 @@ function fightscene.find_monster()
 	return ret
 end
 
+function gen_clientmonster(mons)
+	loca r = {}
+	for i,v in ipairs(mons) do
+		local m = {}
+		m.id = v.id
+		m.name = v.name
+		m.level = v.attri.level
+		m.hp = v.attri.hp
+		m.mp = v.attri.mp
+		table.insert(r, m)
+	end
+	return r
+end
+
 function fightscene.fight()
-	local fight_rate = fightscene.fight_rate * 10
+	local fight_rate = fightscene.fight_rate * 100
 	while true do
 		skynet.sleep(1)
 		local now = skynet.now()
-		for _,player in pairs(actorlist) do-- find every player
-			if now - player.lastfight >= fight_rate then
+		for _, _player in pairs(actorlist) do-- find every player
+			if now - _player.lastfight >= fight_rate then
 				local mons = fightscene.find_monster()
 				if #mons > 0 then
 					local df = {}
-					fightscene.fightround(player, mons, df)
-					player.lastfight = now
+					fightscene.fightround(_player, mons, df)
+					if _player.online then 
+						_player.fightmonster = gen_clientmonster(mons)
+						_player.damageflow = df
+					end
+					_player.lastfight = now
 				end
 			end
 		end
@@ -147,7 +165,9 @@ function fightscene.save_player(playerid)
 end
 
 function CMD.getfightround(playerid)
-	return {monster = {}, damageflow = {}}
+	assert(actorlist[playerid])
+	local p = actorlist[playerid]
+	return {monster = p.fightmonster, damageflow = p.damageflow}
 end
 
 function fightscene.loadthissceneplayer()
