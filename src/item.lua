@@ -35,7 +35,7 @@ end
 function useitem.spellbook(player, item)
 	assert(item)
 	local m = magic.new(item.name)
-	player.add_magic(m)
+	player:add_magic(m)
 end
 
 function useitem.equipment(player, item)

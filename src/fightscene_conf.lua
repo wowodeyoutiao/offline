@@ -1,7 +1,7 @@
 local fight_scene_conf = {
 	[1] = {
-		round_monster_count = 2,
-		fight_rate = 5,
+		round_monster_count = 2,--每回合干几只怪
+		fight_rate = 2,--下一回合间隔
 		name = "初章",
 		boss = {
 			{

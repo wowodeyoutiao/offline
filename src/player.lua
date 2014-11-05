@@ -3,6 +3,7 @@ local game_utils = require "game_utils"
 local damageflow = require "damageflow"
 local player_conf = require "player_conf"
 local player_upgradeexp_conf = require "player_upgradeexp_conf"
+local damageflow = require "damageflow"
 
 local player = {}
 player.__index = player
@@ -52,11 +53,11 @@ function player:delfrombag(itemid)
 end
 
 function player:upgrade(exp)
-	print(self.name..' get '..tostring(exp)..' exp.', self.attri.nextexperience)
 	if self.attri.level >= player_upgradeexp_conf[self.attri.job].max then
-		print(self.name..'is topest level')
+		print(self.name..'已经升级到最高级，不再获得经验')
 		return
 	end
+	print(self.name..' 获得 '..tostring(exp)..' exp.')
 	self.attri.currentexperience = self.attri.currentexperience + exp
 	if self.attri.currentexperience >= self.attri.nextexperience then
 		self.attri.level = self.attri.level + 1
@@ -78,6 +79,8 @@ function player:set_spell_magic_order(skillid, order)
 end
 
 function player:getmagicdamage(nextmagic)
+	return self:spell_magic(1)
+	--[[
 	local magicid = self.spellmagicorder[self.currentspellmagicorder]
 	if magicid then
 		local damagetype, damage = self:spell_magic(magicid)
@@ -91,22 +94,23 @@ function player:getmagicdamage(nextmagic)
 	
 	if not damagetype then return damageflow.none end
 	return damagetype, damage
+	]]
 end
 
 function player:reinitspellmagic()
 	self.currentspellmagicorder = 1
 end
---[[
+
 function player:fight(target, df)
-	local damagetype, damage = self:getmagicdamage()
-	if damagetype ~= damagetype.none then
+	local damagetype, damage = self:spell_magic(1)
+	if damagetype ~= damageflow.none then
+		print(444)
 		damage = target:beingspelldamage(damage)
-		damageflow.add(damagetype.id, self.id, target.id, damage)
+		damageflow.add(damageflow.id, self.id, target.id, damage)
+	else
+		actor.fight(self, target, df)
 	end
-	damagetype ,damage = self:getphysicaldamage()
-	damage = target:beingphysicaldamage(damage)
-	damageflow.add(damagetype.id, self.id, target.id, damage)
 end
-]]
+
 
 return player

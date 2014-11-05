@@ -16,6 +16,7 @@ local playerid =  -1
 local sceneid = -1
 local agentid 
 local fightsceneid 
+local playername 
 
 function db_call(...)
 	return skynet.call("db", "lua", playerid, ...)
@@ -29,8 +30,7 @@ function REQUEST:getplayerinfo()
 		for k,v in pairs(r) do
 			c[k] = v
 		end
-		c.name = "get_player"
-		--c.name = r.name
+		c.name = playername
 
 		c.id = playerid
 		c.fightrate = fightscene_conf[sceneid].fight_rate
@@ -55,6 +55,7 @@ function REQUEST:createplayer()
 	sceneid = 1
 	local r = skynet.call(fightsceneid, "lua", "new_player", name, job, playerid)
 	if r then 
+		playername = skynet.call(fightsceneid, "lua", "online", playerid, agentid)
 		db_call("set", "player."..playerid, playerid)
 		db_call("set", "player."..playerid..".sceneid", 1)
 		return {id = playerid} 
@@ -116,7 +117,7 @@ function agent.loadplayer()
 		fightsceneid = "fightscene"..sceneid
 		sceneid = tonumber(sceneid)
 		print(fightsceneid)
-		local r = skynet.call(fightsceneid, "lua", "online", playerid, agentid)
+		playername = skynet.call(fightsceneid, "lua", "online", playerid, agentid)
 		if ok then return {id = playerid} end
 	end
 	print("loadplayer fail"..tostring(playerid))

@@ -44,10 +44,10 @@ function actor.new()
     t.magicalresistance = 0--魔法抗性
     t.armor = 0--护甲
     t.buff = {}
-    t.magics = {}--技能
-    t.equipments = {}--装备
     t = {attri = t}
     t.name = ""
+    t.magics = {}--技能
+    t.equipments = {}--装备
     math.randomseed(os.time())
     return setmetatable(t, actor)
 end
@@ -107,8 +107,10 @@ function actor:del_equipment(equipment)
     self.equipments[equipment.position] = nil
 end
 
-function actor:add_magic(magic)
-    self.magics[magic.id] = magic
+function actor:add_magic(magic)    
+    self.magics[tonumber(magic.id)] = magic
+        print(32323,magic.id, magic, #self.magics)
+
 end
 
 function actor:get_magic(magicid)
@@ -120,8 +122,12 @@ function actor:del_magic(magiclid)
 end
 
 function actor:spell_magic(magicid)
+    print(self, magicid, self.magics[tonumber(magicid)], #self.magics)
     if self.magics[magicid] then
-	return self.magics[magicid]:spell()
+        print(999)
+	   return self.magics[magicid]:spell()
+    else
+        return damageflow.none
     end
 end
 

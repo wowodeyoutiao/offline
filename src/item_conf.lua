@@ -12,7 +12,7 @@ local  item_conf = {
 	["HELMET"] = 6,
 	["DRESS"]= 7,
 	["WEAPON"] = 8,
-	['exp1'] = { -- type = 0 is direct use item 
+	['exp1'] = { -- type = 0 is direct use item like exp and gold
 		type = -1,
 		subtype = 1,
 		experience = function()
@@ -37,7 +37,6 @@ local  item_conf = {
 		howtouse = 'getexp'
 	},	
 	["暴击术"] = {
-		id = 1,
 		type = 1,
 		subtype = 1,
 		name = "暴击术",
@@ -48,6 +47,7 @@ local  item_conf = {
 			job = 1 + 2 + 4 + 8,
 		},
 		magic = {
+			id = 1,
 			level = 1,
 			maxlevel = 10,
 			needmp = 20,

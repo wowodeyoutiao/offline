@@ -52,13 +52,15 @@ end
 function fightscene.fight()
 	local fight_rate = fightscene.fight_rate * 100
 	print("fightscene "..fightsceneid.." start")
+	local saverate = 0
 	while true do
 		skynet.sleep(100)
 		local now = skynet.now()
 		for _, _player in pairs(actorlist) do-- find every player
 			if now - _player.lastfight >= fight_rate then
-				if _player.online then
-					--sysmessage(_player.agentid, " am is a nice man")
+				if now - saverate > 100 * 10 then --每十秒存一次数据
+					saverate = now;
+					fightscene.save_player(_player.id)
 				end
 				local mons = fightscene.find_monster()
 				if #mons > 0 then
@@ -80,8 +82,11 @@ function fightscene.fight()
 						if items and #items > 0 then
 							for m,n in ipairs(items) do
 								if n.type > 0 then
-									_player:addtobag(n)
-									
+									if (n.type == 1) and (n.subtype == 1) then
+										n:use(_player)
+									else
+										_player:addtobag(n)
+									end
 									if ci then 
 										local i = {
 											id = n.id, 
@@ -109,7 +114,6 @@ function fightscene.fight()
 							end
 							drop.gold = 100
 							drop.items = ci
-							print(_player.agentid)
 							skynet.call(_player.agentid, "lua", "drop", drop)
 						end
 					end
@@ -144,12 +148,13 @@ function fightscene.fightround(player ,monsters, df, items)
 end
 function CMD.online(playerid, agentid)
 	assert(actorlist[playerid])
-	print(743434, agentid)
 	if actorlist[playerid] then
 		local p = actorlist[playerid]
 		p.agentid = agentid
 		p.lastfight = 0
 		p.online = true
+		sysmessage(p.agentid, p.name.."在 "..fightscene.name.." 战场开始了战斗")
+		return p.name
 	end
 end
 
@@ -272,7 +277,6 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, address, cmd, ...)
-		print(cmd)
 		local f = CMD[string.lower(cmd)]
 		if f then
 			skynet.ret(skynet.pack(f(...)))

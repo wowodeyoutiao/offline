@@ -14,7 +14,7 @@ proto.c2s = sprotoparser.parse [[
 	job 2 : integer
 	level 3 : integer
 	currentexperience 4 : integer
-	maxexperience 5 : integer
+	nextexperience 5 : integer
 	hp 6 : integer
 	mp 7 : integer
 	hprate 8 : integer
