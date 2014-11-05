@@ -13,7 +13,9 @@ local fightscene = {}
 local actorlist = {}
 local ordinary_monster = {}
 local boss_monster = {}
-
+function sysmessage(id, s)
+	skynet.send(id, "lua", "sysmessage", s)
+end
 function debugcall(func, ...)
 	local succ, err = pcall(func, ...)
 	if not succ then
@@ -53,6 +55,7 @@ function fightscene.fight()
 	while true do
 		skynet.sleep(100)
 		local now = skynet.now()
+		sysmessage(tostring(now))
 		for _, _player in pairs(actorlist) do-- find every player
 			if now - _player.lastfight >= fight_rate then
 				local mons = fightscene.find_monster()
@@ -65,16 +68,32 @@ function fightscene.fight()
 					local r = fightscene.fightround(_player, mons, df, items)
 					--if win get drop item
 					if  r then
+						if _player.online then
+							local exp = 0
+							local ci = {}
+						end
 						if items and #items > 0 then
 							for m,n in ipairs(items) do
 								if n.type > 0 then
 									_player:addtobag(n)
+									if ci then table.insert(ci, n) end
 								else
-									n:use(_player)
+									local s = n:use(_player)
+									if exp then
+										if n.type == -1 then
+											exp = exp + s
+										end
+									end
 								end
 							end								
 						end
-						_player.droploot = items
+						if _player.online then
+							local drop = {}
+							drop.exp = exp
+							drop.gold = 100
+							drop.items = ci
+							skynet.send(_player.agentid, "lua", "drop", drop)
+						end
 					end
 					_player.damageflow = df
 					_player.lastfight = now
@@ -106,10 +125,11 @@ function fightscene.fightround(player ,monsters, df, items)
 		if not tempplayer:isalive() then return false end	
 	end
 end
-function CMD.online(playerid)
+function CMD.online(playerid, agentid)
 	assert(actorlist[playerid])
 	if actorlist[playerid] then
 		local p = actorlist[playerid]
+		p.agentid = agentid
 		p.lastfight = 0
 		p.online = true
 	end

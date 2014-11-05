@@ -66,9 +66,21 @@ local function send_request(name, args, func)
 end
 
 local last = ""
-
+local server = {}
+function server:drop()
+	print('get exp:',self.exp)
+	print("get gold: ", self.glod)
+	for i,v in ipairs(self.items) do
+		print('get item :', v.name, v.count)
+	end
+	
+end
 local function print_request(name, args)
 	print("REQUEST", name)
+	local f = server[name]
+	if f and args then
+		f(args)
+	end
 	if args then
 		for k,v in pairs(args) do
 			print(k,v)
@@ -195,5 +207,11 @@ while true do
 		df = nil
 		getplayerinfo()
 		getfightround() 
+	end
+	local cmd = socket.readstdin()
+	if cmd then
+		send_request("get", { what = cmd })
+	else
+		socket.usleep(100)
 	end
 end

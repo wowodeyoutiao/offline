@@ -110,6 +110,26 @@ proto.s2c = sprotoparser.parse [[
 	session 1 : integer
 }
 
+.titem {
+	id 0: integer
+	name 1: string
+	count 2: integer
+}
+
+sysmessage 1 {
+	request {
+		msg 0: string
+	}
+}
+
+drop 2 {
+	request {
+		exp 0: integer
+		gold 1: integer
+		items: *titem
+	}
+}
+
 ]]
 --[[
 local f = io.open("proto.txt", "w")

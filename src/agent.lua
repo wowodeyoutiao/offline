@@ -14,6 +14,7 @@ local agent = {}
 local client_fd
 local playerid =  -1
 local sceneid = -1
+local agentid 
 local fightsceneid 
 
 function db_call(...)
@@ -114,7 +115,7 @@ function agent.loadplayer()
 		fightsceneid = "fightscene"..sceneid
 		sceneid = tonumber(sceneid)
 		print(fightsceneid)
-		local r = skynet.call(fightsceneid, "lua", "online", playerid)
+		local r = skynet.call(fightsceneid, "lua", "online", playerid, agentid)
 		if ok then return {id = playerid} end
 	end
 	print("loadplayer fail"..tostring(playerid))
@@ -126,17 +127,26 @@ function agent.offline()
 	print("offline :"..tostring(playerid))
 end
 
-function CMD.start(gate, d, proto)
+function CMD.start(gate, d, proto, id)
 	host = sproto.new(proto.c2s):host "package"
 	send_request = host:attach(sproto.new(proto.s2c)) 
 	client_fd = d.fd
 	playerid =  d.id
+	agentid = id
 	skynet.call(gate, "lua", "forward", d.fd) 
 	agent.loadplayer()
 end
 
 function CMD.exit()
 	agent.offline()
+end
+
+function CMD.drop(drop)
+	send_package(send_request("drop", drop))
+end
+
+function CMD.sysmessage(s)
+	send_package(send_request("sysmessage", s))
 end
 
 skynet.start(function()

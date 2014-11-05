@@ -23,13 +23,14 @@ function item.new(name)
 end
 function item:use(player)
 	assert(player)
-	useitem[self.howtouse](player, self)
+	return useitem[self.howtouse](player, self)
 end
 
 function useitem.getexp(player, item)
 	assert(item)
 	local exp = item.experience(player.attri.level)
 	player:upgrade(exp)
+	return exp
 end
 function useitem.spellbook(player, item)
 	assert(item)

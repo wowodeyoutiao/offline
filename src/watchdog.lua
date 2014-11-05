@@ -42,7 +42,7 @@ end
 
 function  CMD.startagent(d)
 	agent[d.fd] = skynet.newservice("agent")
-	skynet.call(agent[d.fd], "lua", "start", gate, d, proto)
+	skynet.call(agent[d.fd], "lua", "start", gate, d, proto, agent[d.fd])
 end
 
 skynet.start(function()
