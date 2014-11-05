@@ -28,6 +28,7 @@ function player:clone( )
 	local t = player.new()
 	t.currentspellmagicorder = self.currentspellmagicorder
 	t.maxspellmaigccount = self.maxspellmaigccount
+	t.magics = self.magics
 	for k,v in pairs(self.bag) do
 		t.bag[k] = v
 	end
@@ -104,9 +105,8 @@ end
 function player:fight(target, df)
 	local damagetype, damage = self:spell_magic(1)
 	if damagetype ~= damageflow.none then
-		print(444)
 		damage = target:beingspelldamage(damage)
-		damageflow.add(damageflow.id, self.id, target.id, damage)
+		damageflow.add(df, damagetype, self.id, target.id, damage)
 	else
 		actor.fight(self, target, df)
 	end

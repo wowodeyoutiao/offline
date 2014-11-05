@@ -108,9 +108,7 @@ function actor:del_equipment(equipment)
 end
 
 function actor:add_magic(magic)    
-    self.magics[tonumber(magic.id)] = magic
-        print(32323,magic.id, magic, #self.magics)
-
+    self.magics[magic.id] = magic
 end
 
 function actor:get_magic(magicid)
@@ -122,10 +120,9 @@ function actor:del_magic(magiclid)
 end
 
 function actor:spell_magic(magicid)
-    print(self, magicid, self.magics[tonumber(magicid)], #self.magics)
-    if self.magics[magicid] then
-        print(999)
-	   return self.magics[magicid]:spell()
+    local magic = self.magics[magicid]
+    if magic then
+        return magic:spell(self)
     else
         return damageflow.none
     end

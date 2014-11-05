@@ -1,4 +1,5 @@
 local magic = {}
+magic.__index = magic
 local item_conf = require "item_conf"
 
 function magic.new(name)
@@ -14,8 +15,8 @@ function magic.new(name)
 	return nil
 end
 
-function magic:spell()
-	return self.damage(self, self.level)
+function magic:spell(player)
+	return self.damage(player, self.level)
 end
 
 return magic
