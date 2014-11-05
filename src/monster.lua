@@ -38,12 +38,17 @@ function monster:set_default_attri(id)
 	end
 end
 
-function monster:get_drop()
+function monster:get_drop(items)
 	local loot = self.drop
 	if loot then
 		local goods = drop_loot["get_"..loot]()
 		if goods then
-			local t = {}
+			local t
+			if items then
+				t = items
+			else
+				t = {}
+			end
 			for _,v in ipairs(goods) do
 				local it = item.new(v)
 				if it then

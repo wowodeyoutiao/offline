@@ -12,6 +12,30 @@ local  item_conf = {
 	["HELMET"] = 6,
 	["DRESS"]= 7,
 	["WEAPON"] = 8,
+	['exp1'] = { -- type = 0 is direct use item 
+		type = -1,
+		subtype = 1,
+		experience = function()
+			return 100
+		end,
+		howtouse = 'getexp'
+	},
+	['exp2'] = {
+		type = -1,
+		subtype = 2,
+		experience = function(lv)
+			return 100 + lv * 10
+		end,
+		howtouse = 'getexp'
+	},	
+	['exp3'] = {
+		type = -1,
+		subtype = 2,
+		experience = function(lv)
+			return 100 + math.random(1, 100)
+		end,
+		howtouse = 'getexp'
+	},	
 	["暴击术"] = {
 		id = 1,
 		type = 1,

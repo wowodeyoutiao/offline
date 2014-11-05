@@ -32,6 +32,7 @@ end
 
 function game_utils.copy_attri(di, si, force)
 	if si.level or force then di.level = si.level end--级别
+    if si.job or force then di.job = si.job end--职业
     if si.hp or force then di.hp = si.hp end--体力值
     if si.mp or force then di.mp = si.mp end--魔法值
     if si.hprate or force then di.hprate = si.hprate end --每秒回血

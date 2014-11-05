@@ -4,8 +4,9 @@ local damageflow =  require "damageflow"
 local actor = {
     --[[
     level = 0;
+    job = 0;
     currentexperience = 0;
-    maxexperience = 0;
+    nextexperience = 0;
     hp = 0,--体力值
     mp = 0,--魔法值
     hprate = 0, --每秒回血
@@ -28,8 +29,9 @@ actor.__index = actor
 function actor.new()
     local t = {}
     t.level = 0
+    t.job = 0
     t.currentexperience = 0
-    t.maxexperience = 0
+    t.nextexperience = 0
     t.hp = 0--体力值
     t.mp = 0--魔法值
     t.hprate = 0 --每秒回血or每回合回血

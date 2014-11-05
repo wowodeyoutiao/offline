@@ -2,6 +2,7 @@ local actor = require "actor"
 local game_utils = require "game_utils"
 local damageflow = require "damageflow"
 local player_conf = require "player_conf"
+local player_upgradeexp_conf = require "player_upgradeexp_conf"
 
 local player = {}
 player.__index = player
@@ -14,7 +15,11 @@ function player.new(id)
 	t.currentspellmagicorder = 1
 	t.maxspellmaigccount = 1
 	t.bag = {}--包裹
-	if  id and player_conf[id] then game_utils.copy_attri(t.attri, player_conf[id])  end	
+	if id and player_conf[id] and player_upgradeexp_conf[id] then 
+		game_utils.copy_attri(t.attri, player_conf[id])
+		t.attri.nextexperience = player_upgradeexp_conf[id][t.attri.level]
+		end
+	end	
 	setmetatable(t, player)	
 	return t
 end
@@ -44,6 +49,18 @@ end
 function player:delfrombag(itemid)
 	if self.bag[itemid] then
 		self.bag[itemid] = nil
+	end
+end
+
+function player:upgrade(exp)
+	self.attri.currentexperience = self.attri.currentexperience + exp
+	if self.attri.currentexperience >= self.attri.maxexperience then
+		self.attri.level = self.attri.level + 1
+		self.attri.nextexperience = player_upgradeexp_conf[self.job][t.attri.level]
+		print(self.name..'升级到'..tostring(self.attri.level)..'级别')
+		return true
+	else
+		return false
 	end
 end
 

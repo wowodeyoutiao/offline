@@ -53,9 +53,27 @@ function fightscene.fight()
 					if _player.online then 
 						_player.fightmonster = gen_clientmonster(mons)
 					end
-					fightscene.fightround(_player, mons, df)	
+					local r = fightscene.fightround(_player, mons, df)
+					--if win get drop item
+					if r then
+						local items = {}
+						for i,v in ipairs(mons) do
+							v:get_drop(items)
+						end
+						if items and #item > 0 then
+							for m,n in ipairs(items) do
+								if n.type > 0 then
+									_player:addtobag(n)
+								else
+									n:use(_player)
+								end
+							end								
+						end
+						_player.droploot = items
+					end	
 					_player.damageflow = df
 					_player.lastfight = now
+					
 				end
 			end
 		end
@@ -74,13 +92,13 @@ function fightscene.fightround(player ,monsters, df)
 				table.remove(monsters, i)
 			end
 		end
-		if #monsters == 0 then break end
+		if #monsters == 0 then return true end
 		for i,v in ipairs(monsters) do
 			if v:isalive() then
 				v:fight(tempplayer, df)	
 			end
 		end
-		if not tempplayer:isalive() then break end	
+		if not tempplayer:isalive() then return false end	
 	end
 end
 function CMD.online(playerid)
