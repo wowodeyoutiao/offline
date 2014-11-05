@@ -53,6 +53,10 @@ end
 
 function player:upgrade(exp)
 	print(self.name..' get '..tostring(exp)..' exp.', self.attri.nextexperience)
+	if self.attri.level >= player_upgradeexp_conf[self.attri.job].max then
+		print(self.name..'is topest level')
+		return
+	end
 	self.attri.currentexperience = self.attri.currentexperience + exp
 	if self.attri.currentexperience >= self.attri.nextexperience then
 		self.attri.level = self.attri.level + 1

@@ -14,7 +14,7 @@ local actorlist = {}
 local ordinary_monster = {}
 local boss_monster = {}
 function sysmessage(id, s)
-	skynet.send(id, "lua", "sysmessage", s)
+	skynet.call(id, "lua", "sysmessage", s)
 end
 function debugcall(func, ...)
 	local succ, err = pcall(func, ...)
@@ -55,28 +55,41 @@ function fightscene.fight()
 	while true do
 		skynet.sleep(100)
 		local now = skynet.now()
-		sysmessage(tostring(now))
 		for _, _player in pairs(actorlist) do-- find every player
 			if now - _player.lastfight >= fight_rate then
+				if _player.online then
+					--sysmessage(_player.agentid, " am is a nice man")
+				end
 				local mons = fightscene.find_monster()
 				if #mons > 0 then
 					local df = {}
-					if _player.online then 
+					--if _player.online then 
 						_player.fightmonster = gen_clientmonster(mons)
-					end
+					--end
 					local items = {}
 					local r = fightscene.fightround(_player, mons, df, items)
+					_player.damageflow = df
 					--if win get drop item
 					if  r then
+						local exp
+						local ci
 						if _player.online then
-							local exp = 0
-							local ci = {}
+							exp = 0
+							ci = {}
 						end
 						if items and #items > 0 then
 							for m,n in ipairs(items) do
 								if n.type > 0 then
 									_player:addtobag(n)
-									if ci then table.insert(ci, n) end
+									
+									if ci then 
+										local i = {
+											id = n.id, 
+											name = n.name, 
+											count = 1
+										}
+										table.insert(ci, i)
+									end
 								else
 									local s = n:use(_player)
 									if exp then
@@ -89,13 +102,17 @@ function fightscene.fight()
 						end
 						if _player.online then
 							local drop = {}
-							drop.exp = exp
+							if exp then
+								drop.exp = exp
+							else
+								drop.exp = 0
+							end
 							drop.gold = 100
 							drop.items = ci
-							skynet.send(_player.agentid, "lua", "drop", drop)
+							print(_player.agentid)
+							skynet.call(_player.agentid, "lua", "drop", drop)
 						end
 					end
-					_player.damageflow = df
 					_player.lastfight = now
 				end
 			end
@@ -127,6 +144,7 @@ function fightscene.fightround(player ,monsters, df, items)
 end
 function CMD.online(playerid, agentid)
 	assert(actorlist[playerid])
+	print(743434, agentid)
 	if actorlist[playerid] then
 		local p = actorlist[playerid]
 		p.agentid = agentid
@@ -170,7 +188,7 @@ end
 
 function CMD.get_player(playerid)
 	assert(actorlist[playerid])
-	return actorlist[playerid]
+	return actorlist[playerid].attri
 end
 
 function db_call(...)

@@ -126,7 +126,7 @@ drop 2 {
 	request {
 		exp 0: integer
 		gold 1: integer
-		items: *titem
+		items 2: *titem
 	}
 }
 

@@ -69,7 +69,8 @@ local last = ""
 local server = {}
 function server:drop()
 	print('get exp:',self.exp)
-	print("get gold: ", self.glod)
+	print("get gold: ", self.gold)
+	if not self.items then return end
 	for i,v in ipairs(self.items) do
 		print('get item :', v.name, v.count)
 	end
@@ -78,13 +79,14 @@ end
 local function print_request(name, args)
 	print("REQUEST", name)
 	local f = server[name]
-	if f and args then
-		f(args)
-	end
+
 	if args then
 		for k,v in pairs(args) do
 			print(k,v)
 		end
+	end
+	if f and args then
+		f(args)
 	end
 end
 
@@ -157,9 +159,6 @@ function getplayerinfo()
 		if args.ok then 
 			print("getplayerinfo ok")
 			player = args.player
-			for k,v in pairs(player) do
-				print(k,v)
-			end
 		else
 			createplayer()
 			getplayerinfo()

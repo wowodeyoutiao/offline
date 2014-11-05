@@ -26,10 +26,11 @@ function REQUEST:getplayerinfo()
 	local r = skynet.call(fightsceneid, "lua", "get_player", playerid)
 	if r then
 		local c = {}
-		for k,v in pairs(r.attri) do
+		for k,v in pairs(r) do
 			c[k] = v
 		end
-		c.name = r.name
+		c.name = "get_player"
+		--c.name = r.name
 
 		c.id = playerid
 		c.fightrate = fightscene_conf[sceneid].fight_rate
@@ -146,7 +147,7 @@ function CMD.drop(drop)
 end
 
 function CMD.sysmessage(s)
-	send_package(send_request("sysmessage", s))
+	send_package(send_request("sysmessage",{msg = s}))
 end
 
 skynet.start(function()
