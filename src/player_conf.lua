@@ -1,7 +1,7 @@
 local player_conf = {
 	job_count = 4,
 	[1] = {--default_male_warrior
-		level = 0,
+		level = 1,
 		job = 1,
 		hp = 2000,
 		mp = 100,

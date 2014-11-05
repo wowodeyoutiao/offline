@@ -39,7 +39,7 @@ function monster:set_default_attri(id)
 end
 
 function monster:get_drop(items)
-	local loot = self.drop
+	local loot = self.drop 
 	if loot then
 		local goods = drop_loot["get_"..loot]()
 		if goods then

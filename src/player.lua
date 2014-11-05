@@ -18,7 +18,6 @@ function player.new(id)
 	if id and player_conf[id] and player_upgradeexp_conf[id] then 
 		game_utils.copy_attri(t.attri, player_conf[id])
 		t.attri.nextexperience = player_upgradeexp_conf[id][t.attri.level]
-		end
 	end	
 	setmetatable(t, player)	
 	return t
@@ -53,11 +52,13 @@ function player:delfrombag(itemid)
 end
 
 function player:upgrade(exp)
+	print(self.name..' get '..tostring(exp)..' exp.', self.attri.nextexperience)
 	self.attri.currentexperience = self.attri.currentexperience + exp
-	if self.attri.currentexperience >= self.attri.maxexperience then
+	if self.attri.currentexperience >= self.attri.nextexperience then
 		self.attri.level = self.attri.level + 1
-		self.attri.nextexperience = player_upgradeexp_conf[self.job][t.attri.level]
-		print(self.name..'升级到'..tostring(self.attri.level)..'级别')
+		self.attri.nextexperience = player_upgradeexp_conf[self.attri.job][self.attri.level]
+		self.attri.currentexperience = 0
+		print(self.name..'升级到'..tostring(self.attri.level)..'级')
 		return true
 	else
 		return false

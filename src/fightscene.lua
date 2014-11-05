@@ -14,6 +14,14 @@ local actorlist = {}
 local ordinary_monster = {}
 local boss_monster = {}
 
+function debugcall(func, ...)
+	local succ, err = pcall(func, ...)
+	if not succ then
+		print(err)
+	end
+	return err
+end
+
 function fightscene.find_monster()
 	local ret = {} 
 	for i=1,fightscene.round_monster_count do
@@ -53,14 +61,11 @@ function fightscene.fight()
 					if _player.online then 
 						_player.fightmonster = gen_clientmonster(mons)
 					end
-					local r = fightscene.fightround(_player, mons, df)
+					local items = {}
+					local r = fightscene.fightround(_player, mons, df, items)
 					--if win get drop item
-					if r then
-						local items = {}
-						for i,v in ipairs(mons) do
-							v:get_drop(items)
-						end
-						if items and #item > 0 then
+					if  r then
+						if items and #items > 0 then
 							for m,n in ipairs(items) do
 								if n.type > 0 then
 									_player:addtobag(n)
@@ -70,17 +75,16 @@ function fightscene.fight()
 							end								
 						end
 						_player.droploot = items
-					end	
+					end
 					_player.damageflow = df
 					_player.lastfight = now
-					
 				end
 			end
 		end
 	end
 end
 
-function fightscene.fightround(player ,monsters, df)
+function fightscene.fightround(player ,monsters, df, items)
 	local tempplayer = {}
 	if not player then return end
 	tempplayer = player:clone()
@@ -89,6 +93,7 @@ function fightscene.fightround(player ,monsters, df)
 			if v:isalive() then
 				tempplayer:fight(v, df)
 			else
+				v:get_drop(items)
 				table.remove(monsters, i)
 			end
 		end
