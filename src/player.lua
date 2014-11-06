@@ -77,7 +77,7 @@ function player:del_equipment(equipment)
 end
 
 function player:have_equipment(position)
-	if self.equipments[equipment.position] then
+	if self.equipments[position] then
 		return true
 	else
 		return false
