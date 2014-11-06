@@ -64,7 +64,7 @@ function fightscene.getdrop(_player, items)
 				else
 					_player:addtobag(n)
 				end
-				if n.type == 2 and n:use(_player) then -- 装备
+				if n.type == 2 and _player.attri.level >= n.need.level  and n:use(_player) then -- 装备
 					print(_player.name.."take on "..n.name)
 				else
 					_player:addtobag(n)

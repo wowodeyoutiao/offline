@@ -104,7 +104,7 @@ local item_conf = {
 		name = '布衣(男)',
 		job = 0,
 		need = {
-			level = 10,
+			level = 3,
 			job = 1 + 2 + 4 + 8,
 		},
 		hp = 100
@@ -118,7 +118,7 @@ local item_conf = {
 		name = '小木棍',
 		job = 0,
 		need = {
-			level = 10,
+			level = 3,
 			job = 1 + 2 + 4 + 8,
 		},
 		physicaldamage = 100
