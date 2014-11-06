@@ -1,4 +1,4 @@
-##a skynet demo
+##offline, a skynet demo   
 ##run
 ###1. run redis-server first
 ###2. 
@@ -13,7 +13,7 @@ cd ..
 lua client.lua
 
 ##说明
-demo类似于现在所谓的那些放置类手游，一创建角色就在场景就开始打怪，得经验，爆装备，得金钱。   
+demo类似于现在所谓的那些放置类手游，创建了角色，就开始在场景中打怪，得经验，爆装备，得金钱。   
 把一个场景的boss打过了，可以去下一个场景，暂时只配置了一个场景    
 fightscene_conf.lua配置每个场景中遇到的怪   
 item_conf.lua配置所有的道具   
