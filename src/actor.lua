@@ -107,8 +107,13 @@ function actor:del_equipment(equipment)
     self.equipments[equipment.position] = nil
 end
 
-function actor:add_magic(magic)    
-    self.magics[magic.id] = magic
+function actor:add_magic(magic)   
+    if not self.magics[magic.id] then
+        self.magics[magic.id] = magic
+        return magic.id
+    else
+        return 0
+    end
 end
 
 function actor:get_magic(magicid)

@@ -35,7 +35,14 @@ end
 function useitem.spellbook(player, item)
 	assert(item)
 	local m = magic.new(item.name)
-	player:add_magic(m)
+	assert(m)
+	local r = player:add_magic(m)
+	if r > 0 then
+		player:set_spell_magic_order(r)
+		return true
+	else
+		return false
+	end
 end
 
 function useitem.equipment(player, item)

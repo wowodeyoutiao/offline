@@ -14,7 +14,6 @@ function player.new(id)
 	local t = actor.new()
 	t.spellmagicorder = {}
 	t.currentspellmagicorder = 1
-	t.maxspellmaigccount = 1
 	t.bag = {}--包裹
 	if id and player_conf[id] and player_upgradeexp_conf[id] then 
 		game_utils.copy_attri(t.attri, player_conf[id])
@@ -27,14 +26,9 @@ end
 function player:clone( )
 	local t = player.new()
 	t.currentspellmagicorder = self.currentspellmagicorder
-	t.maxspellmaigccount = self.maxspellmaigccount
 	t.magics = self.magics
-	for k,v in pairs(self.bag) do
-		t.bag[k] = v
-	end
-	for k,v in pairs(self.spellmagicorder) do
-		t.spellmagicorder[k] = v
-	end
+	t.bag = self.bag
+	t.spellmagicorder = self.spellmagicorder
 	t.id = self.id
 	t.name = self.name
 	game_utils.copy_attri(t.attri, self.attri) 
@@ -71,31 +65,29 @@ function player:upgrade(exp)
 	end
 end
 
-function player:set_spell_magic_order(skillid, order)
-	if (order <= self.maxspellmaigccount) and (self.skill[skillid]) then
-		self.releaseskillorder[order] = skillid
+function player:set_spell_magic_order(magicid, order)
+	if self:get_magic(magicid) then
+		if order then
+			table.insert(self.spellmagicorder, order, magicid)
+		else
+			table.insert( self.spellmagicorder, magicid)
+		end
+		self:reinitspellmagic()
 		return true
 	end
 	return false
 end
 
 function player:getmagicdamage(nextmagic)
-	return self:spell_magic(1)
-	--[[
 	local magicid = self.spellmagicorder[self.currentspellmagicorder]
+	if nextmagic then
+		self.currentspellmagicorder = (self.currentspellmagicorder + 1) % #self.spellmagicorder
+	end
 	if magicid then
-		local damagetype, damage = self:spell_magic(magicid)
+		return damagetype, damage = self:spell_magic(magicid)
 	else
 		return damageflow.none
 	end
-
-	if nextmagic then
-		self.currentspellmagicorder = (self.currentspellmagicorder + 1) % self.maxspellmaigccount
-	end
-	
-	if not damagetype then return damageflow.none end
-	return damagetype, damage
-	]]
 end
 
 function player:reinitspellmagic()
@@ -103,7 +95,7 @@ function player:reinitspellmagic()
 end
 
 function player:fight(target, df)
-	local damagetype, damage = self:spell_magic(1)
+	local damagetype, damage = self:getmagicdamage()
 	if damagetype ~= damageflow.none then
 		damage = target:beingspelldamage(damage)
 		damageflow.add(df, damagetype, self.id, target.id, damage)

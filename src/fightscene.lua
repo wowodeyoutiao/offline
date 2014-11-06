@@ -49,6 +49,51 @@ function gen_clientmonster(mons)
 	return r
 end
 
+function fightscene.getdrop(_player, items)
+	local exp
+	local ci
+	if _player.online then
+		exp = 0
+		ci = {}
+	end
+	if items and #items > 0 then
+		for m,n in ipairs(items) do
+			if n.type > 0 then
+				if n.type == 1 and n:use(_player) then -- 是技能直接学了
+				else
+					_player:addtobag(n)
+				end
+				if ci then 
+					local i = {
+						id = n.id, 
+						name = n.name, 
+						count = 1
+					}
+					table.insert(ci, i)
+				end
+			else
+				local s = n:use(_player)
+				if exp then
+					if n.type == -1 then
+						exp = exp + s
+					end
+				end
+			end
+		end								
+	end
+	if _player.online then
+		local drop = {}
+		if exp then
+			drop.exp = exp
+		else
+			drop.exp = 0
+		end
+		drop.gold = 100
+		drop.items = ci
+		skynet.call(_player.agentid, "lua", "drop", drop)
+	end
+end
+
 function fightscene.fight()
 	local fight_rate = fightscene.fight_rate * 100
 	print("fightscene "..fightsceneid.." start")
@@ -72,50 +117,8 @@ function fightscene.fight()
 					local r = fightscene.fightround(_player, mons, df, items)
 					_player.damageflow = df
 					--if win get drop item
-					if  r then
-						local exp
-						local ci
-						if _player.online then
-							exp = 0
-							ci = {}
-						end
-						if items and #items > 0 then
-							for m,n in ipairs(items) do
-								if n.type > 0 then
-									if (n.type == 1) and (n.subtype == 1) then
-										n:use(_player)
-									else
-										_player:addtobag(n)
-									end
-									if ci then 
-										local i = {
-											id = n.id, 
-											name = n.name, 
-											count = 1
-										}
-										table.insert(ci, i)
-									end
-								else
-									local s = n:use(_player)
-									if exp then
-										if n.type == -1 then
-											exp = exp + s
-										end
-									end
-								end
-							end								
-						end
-						if _player.online then
-							local drop = {}
-							if exp then
-								drop.exp = exp
-							else
-								drop.exp = 0
-							end
-							drop.gold = 100
-							drop.items = ci
-							skynet.call(_player.agentid, "lua", "drop", drop)
-						end
+					if r then
+						fightscene.getdrop(_player, items)
 					end
 					_player.lastfight = now
 				end

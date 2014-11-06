@@ -6,6 +6,7 @@ local damageflow = {
 	hprenew = 5,
 	mprenew = 6,
 	criticalmaigc = 7,
+	c4 = 8,
 }
 
 local damagetype = {
@@ -15,7 +16,8 @@ local damagetype = {
 	{id = "魔法伤害", type = "魔法伤害"},
 	{id = "生命回复", type = "生命值"},
 	{id = "魔法回复", type = "魔法值"},
-	{id = "暴击术", type = "魔法伤害"}
+	{id = "暴击术", type = "魔法伤害"},
+	{id = "C4", type = "爆炸伤害"}
 }
 
 function damageflow.add(df, atype,asrc, adest, adamage)

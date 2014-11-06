@@ -61,6 +61,31 @@ local  item_conf = {
 			end
 		}
 	},
+	["C4"] = {
+		type = 1,
+		subtype = 2,
+		name = "C4",
+		howtouse = "spellbook",
+		explanation = "对敌人造成超高爆炸伤害",
+		need = {
+			level = 10,
+			job = 1 + 2 + 4 + 8,
+		},
+		magic = {
+			id = 2,
+			level = 1,
+			maxlevel = 10,
+			needmp = 20,
+			currlevelexp = 0,
+			nextlevelexp = 0,
+			getnextlevelexp = function(level)
+				return 200 + level * 100
+			end,
+			damage = function(owner, lv)
+				return damageflow.criticalmaigc, owner.attri.physicaldamage * 10
+			end
+		}
+	},
 	["布衣(男)"] = {
 		id = 2,
 		position = NECKLACE,
