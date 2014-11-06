@@ -82,7 +82,7 @@ local  item_conf = {
 				return 200 + level * 100
 			end,
 			damage = function(owner, lv)
-				return damageflow.criticalmaigc, owner.attri.physicaldamage * 10
+				return damageflow.c4, owner.attri.physicaldamage * 5
 			end
 		}
 	},

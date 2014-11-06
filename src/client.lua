@@ -114,7 +114,7 @@ function server:drop()
 	print("get gold: ", self.gold)
 	if not self.items then return end
 	for i,v in ipairs(self.items) do
-		printyellow('get item :'..v.name..tostring(v.count))
+		printyellow('get item :'..v.name..'  count:'..tostring(v.count))
 	end
 end
 

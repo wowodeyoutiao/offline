@@ -60,6 +60,7 @@ function fightscene.getdrop(_player, items)
 		for m,n in ipairs(items) do
 			if n.type > 0 then
 				if n.type == 1 and n:use(_player) then -- 是技能直接学了
+					print(_player.name.."learn "..n.name)
 				else
 					_player:addtobag(n)
 				end

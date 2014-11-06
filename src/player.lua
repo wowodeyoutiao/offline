@@ -79,23 +79,23 @@ function player:set_spell_magic_order(magicid, order)
 end
 
 function player:getmagicdamage(nextmagic)
-	local magicid = self.spellmagicorder[self.currentspellmagicorder]
+	local magicid = self.spellmagicorder[self.currentspellmagicorder + 1]
 	if nextmagic then
-		self.currentspellmagicorder = (self.currentspellmagicorder + 1) % #self.spellmagicorder
+		self.currentspellmagicorder = (self.currentspellmagicorder + 1) % #self.spellmagicorder 
 	end
 	if magicid then
-		return damagetype, damage = self:spell_magic(magicid)
+		return self:spell_magic(magicid)
 	else
 		return damageflow.none
 	end
 end
 
 function player:reinitspellmagic()
-	self.currentspellmagicorder = 1
+	self.currentspellmagicorder = 0
 end
 
 function player:fight(target, df)
-	local damagetype, damage = self:getmagicdamage()
+	local damagetype, damage = self:getmagicdamage(true)
 	if damagetype ~= damageflow.none then
 		damage = target:beingspelldamage(damage)
 		damageflow.add(df, damagetype, self.id, target.id, damage)
