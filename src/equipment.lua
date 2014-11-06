@@ -3,6 +3,7 @@ local game_utils = require "game_utils"
 local equipment = {
 totalid = 1
 }
+equipment.__index = equipment
 --get a new equipment
 function equipment.new(id)
 	assert(item_conf[id])
@@ -22,4 +23,6 @@ end
 function equipment:del_attri(actor)
 	game_utils.del_attri(actor.attri, self)
 end
+
+return equipment
 

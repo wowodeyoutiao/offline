@@ -2,16 +2,25 @@
 	1 技能书
 ]]
 local damageflow = require "damageflow"
+
+local NECKLACE = 1
+local LEFTRING = 2
+local RIGHTRING = 3
+local SHOE = 4
+local BELT = 5
+local HELMET = 6
+local DRESS = 7
+local WEAPON = 8
 	
-local  item_conf = {
+local item_conf = {
 	NECKLACE = 1,
-	["LEFTRING"] = 2,
-	["RIGHTRING"]= 3,
-	["SHOE"]= 4,
-	["BELT"]= 5,
-	["HELMET"] = 6,
-	["DRESS"]= 7,
-	["WEAPON"] = 8,
+	LEFTRING = 2,
+	RIGHTRING = 3,
+	SHOE = 4,
+	BELT = 5,
+	HELMET = 6,
+	DRESS = 7,
+	WEAPON = 8,
 	['exp1'] = { -- type = 0 is direct use item like exp and gold
 		type = -1,
 		subtype = 1,

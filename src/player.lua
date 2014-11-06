@@ -29,6 +29,7 @@ function player:clone( )
 	t.currentspellmagicorder = self.currentspellmagicorder
 	t.magics = self.magics
 	t.bag = self.bag
+	t.equipments = self.equipments
 	t.spellmagicorder = self.spellmagicorder
 	t.id = self.id
 	t.name = self.name
@@ -67,7 +68,13 @@ function player:delfrombag(itemid)
 end
 
 function player:add_equipment(equipment)
+	for k,v in pairs(self.attri) do
+		print("1",k,v)
+	end
     equipment:add_attri(self)
+	for k,v in pairs(self.attri) do
+		print("2",k,v)
+	end
     self.equipments[equipment.position] = equipment
 end
 

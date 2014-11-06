@@ -47,16 +47,11 @@ end
 
 function useitem.equipment(player, item)
 	assert(item)
-	print(722228, player)
-	if not player:have_equipment() then
-		print(7222281)
+	if not player:have_equipment(item.position) then
 		local e = equipment.new(item.name)
-		print(7222281)
 		player:add_equipment(e)
-		print(72222832)
 		return true
 	end
-	print(712121)
 	return false
 end
 
