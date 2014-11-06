@@ -1,15 +1,14 @@
 ##a skynet demo
 ##run
-#1. run redis-server first
-#2.
-git clone https://github.com/xiuzhifu/offline.git
-git submodule init
-git submodule update
-cd skynet 
-make macosx(select your os)
-cd ..
-./run.sh
-#3. cd src 
+###1. run redis-server first
+###2. git clone https://github.com/xiuzhifu/offline.git   
+git submodule init   
+git submodule update   
+cd skynet    
+make macosx(select your os)   
+cd ..   
+./run.sh   
+###3. cd src 
 lua client.lua
 
 ##说明
