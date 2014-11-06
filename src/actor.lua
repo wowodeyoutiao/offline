@@ -47,7 +47,6 @@ function actor.new()
     t = {attri = t}
     t.name = ""
     t.magics = {}--技能
-    t.equipments = {}--装备
     math.randomseed(os.time())
     return setmetatable(t, actor)
 end
@@ -95,16 +94,6 @@ function actor:check_buff(time)
             v = nil
         end
     end 
-end
-
-function actor:add_equipment(equipment)
-    equipment:add_attri(self)
-    self.equipments[equipment.position] = equipment
-end
-
-function actor:del_equipment(equipment)
-    equipment.del_attri(self)
-    self.equipments[equipment.position] = nil
 end
 
 function actor:add_magic(magic)   
