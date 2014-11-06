@@ -87,8 +87,10 @@ local  item_conf = {
 		}
 	},
 	["布衣(男)"] = {
+		type = 2,
+		subtype = 1,
 		id = 2,
-		position = NECKLACE,
+		position = item_conf.DRESS,
 		name = '布衣(男)',
 		job = 0,
 		need = {
@@ -96,7 +98,20 @@ local  item_conf = {
 			job = 1 + 2 + 4 + 8,
 		},
 		hp = 100
-	}
+	},
+	["小木棍"] = {
+		type = 2,
+		subtype = 2,
+		id = 2,
+		position = item_conf.WEAPON,
+		name = '小木棍',
+		job = 0,
+		need = {
+			level = 10,
+			job = 1 + 2 + 4 + 8,
+		},
+		physicaldamage = 100
+	},
 }
 
 return item_conf

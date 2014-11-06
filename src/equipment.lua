@@ -8,10 +8,10 @@ function equipment.new(id)
 	assert(item_conf[id])
 	local t = setmetatable({}, equipment)
 	t.id = equipment.totalid	
+	equipment.totalid = equipment.totalid + 1
 	for k,v in pairs(item_conf[id]) do
 		t[k] = v
 	end
-	equipment.totalid = equipment.totalid + 1
 	return t
 end
 

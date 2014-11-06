@@ -47,8 +47,12 @@ end
 
 function useitem.equipment(player, item)
 	assert(item)
-	local e = equipment(item.name)
-	player:add_equipment(e)
+	if not player:have_equipment() then
+		local e = equipment.new(item.name)
+		player:add_equipment(e)
+		return true
+	end
+	return false
 end
 
 return item
